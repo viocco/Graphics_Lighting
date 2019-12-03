@@ -439,33 +439,79 @@ VBObox0.prototype.reload = function() {
 // Gouraud Shading
 function VBObox1() {
 
-	this.VERT_SRC =	//--------------------- VERTEX SHADER source code
-	`
+	this.VERT_SRC = `
+	// Required
 	precision highp float;
 
+	// Uniforms
+	uniform mat4 u_ProjectionMatrix;
   uniform mat4 u_ModelMatrix;
-  attribute vec4 a_Pos1;
+	uniform mat4 u_NormalMatrix;
+
+	// Attributes
+	attribute vec4 a_Pos1;
   attribute vec3 a_Colr1;
   attribute vec3 a_Normal1;
+
+	// Varyings
   varying vec3 v_Colr1;
+	varying vec3 v_NormalInterp;
+	varying vec3 v_VertPos;
+
+	// Constants
+	float Ka = 1.0; // Ambient reflection coefficient
+	float Kd = 1.0; // Diffuse reflection coefficient
+	float Ks = 1.0; // Specular reflection coefficient
+	float shininess = 80.0;
+	// Material color
+	vec3 ambientColor = vec3(0.2, 0.1, 0.0);
+	vec3 diffuseColor = vec3(1.0, 0.0, 0.0);
+	vec3 specularColor = vec3(1.0, 1.0, 1.0);
+	vec3 lightPos = vec3(1.0, 1.0, -1.0);
 
   void main() {
-    gl_Position = u_ModelMatrix * a_Pos1;
-		gl_Position = u_ModelMatrix * vec4(a_Normal1, 1);
-  	v_Colr1 = a_Colr1;
-  }
-	`;
+    vec4 vertPos = u_ModelMatrix * a_Pos1;
+		v_VertPos = vec3(vertPos) / vertPos.w;
+		v_NormalInterp = vec3(u_NormalMatrix * vec4(a_Normal1, 0.0));
+		gl_Position = u_ProjectionMatrix * vertPos;
 
-	this.FRAG_SRC = //---------------------- FRAGMENT SHADER source code
-  `
+		vec3 N = normalize(v_NormalInterp);
+		vec3 L = normalize(lightPos - v_VertPos);
+		// Lambert stuff
+		float lambertian = max(dot(N, L), 0.0);
+		float specular = 0.0;
+		if (lambertian > 0.0) {
+			vec3 R = reflect(-L, N);
+			vec3 V = normalize(-v_VertPos);
+			float specAngle = max(dot(R, V), 0.0);
+			specular = pow(specAngle, shininess);
+		}
+
+  	v_Colr1 = vec3(Ka * ambientColor +
+									 Kd * lambertian * a_Colr1 +
+								   Ks * specular * specularColor);
+  }`;
+
+	this.FRAG_SRC = `
 	precision mediump float;
   varying vec3 v_Colr1;
   void main() {
-		gl_FragColor = vec4(v_Colr1, 0);
-  }
-	`;
+		gl_FragColor = vec4(v_Colr1, 1.0);
+  }`;
 
-	this.vboContents = makeSphere2(1, 0, 0);
+	this.vboContents =
+	// new Float32Array([
+	// 	0, 0, 0, 1,
+	// 	1, 0, 0,
+	// 	0, 0, 1,
+	// 	1, 0, 0, 1,
+	// 	1, 0, 0,
+	// 	0, 0, 1,
+	// 	1, 1, 0, 1,
+	// 	1, 0, 0,
+	// 	0, 0, 1
+	// ]);
+	makeSphere2(1, 0, 0);
 
 	this.vboVerts = this.vboContents.length / 10; // # of vertices held in 'vboContents' array;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
@@ -518,6 +564,9 @@ function VBObox1() {
 	            //---------------------- Uniform locations &values in our shaders
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
 	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
+	this.ProjectionMatrix = new Matrix4();
+	this.u_ProjectionMatrixLoc;
+	this.u_NormalMatrixLoc;
 };
 
 VBObox1.prototype.init = function() {
@@ -606,6 +655,18 @@ VBObox1.prototype.init = function() {
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
   }
+	this.u_ProjectionMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ProjectionMatrix');
+   if (!this.u_ProjectionMatrixLoc) {
+     console.log(this.constructor.name +
+     						'.init() failed to get GPU location for u_ProjectionMatrix uniform');
+     return;
+   }
+	this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix');
+   if (!this.u_NormalMatrixLoc) {
+     console.log(this.constructor.name +
+     						'.init() failed to get GPU location for u_NormalMatrix uniform');
+     return;
+   }
 }
 
 VBObox1.prototype.switchToMe = function () {
@@ -699,13 +760,14 @@ VBObox1.prototype.adjust = function() {
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
 
-  this.ModelMatrix.setPerspective(30 * aspect, aspect, 1, 100);
-  this.ModelMatrix.lookAt(
+  this.ProjectionMatrix.setPerspective(30 * aspect, aspect, 1, 100);
+  this.ProjectionMatrix.lookAt(
     g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
     g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
     g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
   );
 
+	this.ModelMatrix.setTranslate(0, 0, 0);
   this.ModelMatrix.scale(1 * aspect, 1, 1);
   this.ModelMatrix.scale(0.8, 0.8, 0.8);
 	this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
@@ -714,6 +776,12 @@ VBObox1.prototype.adjust = function() {
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc,	// GPU location of the uniform
   										false, 										// use matrix transpose instead?
   										this.ModelMatrix.elements);	// send data from Javascript.
+	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc,
+		false,
+		this.ProjectionMatrix.elements);
+	gl.uniformMatrix4fv(this.u_NormalMatrixLoc,
+		false,
+		this.ModelMatrix.invert().transpose().elements);
 }
 
 VBObox1.prototype.draw = function() {

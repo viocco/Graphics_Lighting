@@ -145,6 +145,5 @@ function makeSphere2(r, g, b) {
       sphVerts[j + 9] = sphVerts[j + 2];
     }
   }
-  console.log(sphVerts);
   return sphVerts;
 }
