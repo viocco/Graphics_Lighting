@@ -102,21 +102,8 @@ As each 'VBObox' object can contain:
 //=============================================================================
 
 
-//=============================================================================
-//=============================================================================
+// Ground Plane
 function VBObox0() {
-//=============================================================================
-//=============================================================================
-// CONSTRUCTOR for one re-usable 'VBObox0' object that holds all data and fcns
-// needed to render vertices from one Vertex Buffer Object (VBO) using one
-// separate shader program (a vertex-shader & fragment-shader pair) and one
-// set of 'uniform' variables.
-
-// Constructor goal:
-// Create and set member vars that will ELIMINATE ALL LITERALS (numerical values
-// written into code) in all other VBObox functions. Keeping all these (initial)
-// values here, in this one coonstrutor function, ensures we can change them
-// easily WITHOUT disrupting any other code, ever!
 
 	this.VERT_SRC =	//--------------------- VERTEX SHADER source code
   'precision highp float;\n' +				// req'd in OpenGL ES if we use 'float'
@@ -180,8 +167,7 @@ function VBObox0() {
      verts[i+4] = 0 / 255;
      verts[i+5] = 40 / 255;
      verts[i+6] = 80 / 255;
-     // verts[i+7] = 1;
-   }
+  }
 
 	this.vboContents = //---------------------------------------------------------
 	verts;
@@ -448,21 +434,8 @@ VBObox0.prototype.reload = function() {
 
 }
 
-//=============================================================================
-//=============================================================================
+// Gouraud Shading
 function VBObox1() {
-//=============================================================================
-//=============================================================================
-// CONSTRUCTOR for one re-usable 'VBObox1' object that holds all data and fcns
-// needed to render vertices from one Vertex Buffer Object (VBO) using one
-// separate shader program (a vertex-shader & fragment-shader pair) and one
-// set of 'uniform' variables.
-
-// Constructor goal:
-// Create and set member vars that will ELIMINATE ALL LITERALS (numerical values
-// written into code) in all other VBObox functions. Keeping all these (initial)
-// values here, in this one coonstrutor function, ensures we can change them
-// easily WITHOUT disrupting any other code, ever!
 
 	this.VERT_SRC =	//--------------------- VERTEX SHADER source code
   'precision highp float;\n' +				// req'd in OpenGL ES if we use 'float'
@@ -660,7 +633,7 @@ VBObox1.prototype.switchToMe = function () {
 //==============================================================================
 // Set GPU to use this VBObox's contents (VBO, shader, attributes, uniforms...)
 //
-// We only do this AFTER we called the init() function, which does the one-time-
+// We only do this AFTER w
 // only setup tasks to put our VBObox contents into GPU memory.  !SURPRISE!
 // even then, you are STILL not ready to draw our VBObox's contents onscreen!
 // We must also first complete these steps:
@@ -792,21 +765,8 @@ VBObox1.prototype.reload = function() {
  					 				this.vboContents);   // the JS source-data array used to fill VBO
 }
 
-//=============================================================================
-//=============================================================================
+// Phong Shading
 function VBObox2() {
-//=============================================================================
-//=============================================================================
-// CONSTRUCTOR for one re-usable 'VBObox2' object that holds all data and fcns
-// needed to render vertices from one Vertex Buffer Object (VBO) using one
-// separate shader program (a vertex-shader & fragment-shader pair) and one
-// set of 'uniform' variables.
-
-// Constructor goal:
-// Create and set member vars that will ELIMINATE ALL LITERALS (numerical values
-// written into code) in all other VBObox functions. Keeping all these (initial)
-// values here, in this one coonstrutor function, ensures we can change them
-// easily WITHOUT disrupting any other code, ever!
 
 	this.VERT_SRC =	//--------------------- VERTEX SHADER source code
   'precision highp float;\n' +				// req'd in OpenGL ES if we use 'float'
