@@ -127,6 +127,7 @@ function makeSphere2(r, g, b) {
         sphVerts[j] = cosBot * Math.cos(Math.PI * v / sliceVerts); // x
         sphVerts[j + 1] = cosBot * Math.sin(Math.PI * v / sliceVerts); // y
         sphVerts[j + 2] = sinBot; // z
+        sphVerts[j + 3] = 1;
       } else { // put vertices with odd-numbered v at the the slice's top edge
         // (why PI and not 2*PI? because 0 <= v < 2*sliceVerts
         // and thus we can simplify cos(2*PI* ((v-1)/2)*sliceVerts)
@@ -143,6 +144,9 @@ function makeSphere2(r, g, b) {
       sphVerts[j + 7] = sphVerts[j];
       sphVerts[j + 8] = sphVerts[j + 1];
       sphVerts[j + 9] = sphVerts[j + 2];
+      if (v == 10) {
+        console.log(sphVerts);
+      }
     }
   }
   return sphVerts;
