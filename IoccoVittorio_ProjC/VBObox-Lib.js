@@ -475,21 +475,23 @@ function VBObox1() {
 		v_NormalInterp = vec3(u_NormalMatrix * vec4(a_Normal1, 0.0));
 		gl_Position = u_ProjectionMatrix * vertPos;
 
-		vec3 N = normalize(v_NormalInterp);
-		vec3 L = normalize(lightPos - v_VertPos);
-		// Lambert stuff
-		float lambertian = max(dot(N, L), 0.0);
-		float specular = 0.0;
-		if (lambertian > 0.0) {
-			vec3 R = reflect(-L, N);
-			vec3 V = normalize(-v_VertPos);
-			float specAngle = max(dot(R, V), 0.0);
-			specular = pow(specAngle, shininess);
-		}
+		// vec3 N = normalize(v_NormalInterp);
+		// vec3 L = normalize(lightPos - v_VertPos);
+		// // Lambert stuff
+		// float lambertian = max(dot(N, L), 0.0);
+		// float specular = 0.0;
+		// if (lambertian > 0.0) {
+		// 	vec3 R = reflect(-L, N);
+		// 	vec3 V = normalize(-v_VertPos);
+		// 	float specAngle = max(dot(R, V), 0.0);
+		// 	specular = pow(specAngle, shininess);
+		// }
 
-  	v_Colr1 = vec3(Ka * ambientColor +
-									 Kd * lambertian * a_Colr1 +
-								   Ks * specular * specularColor);
+  	// v_Colr1 = vec3(Ka * ambientColor +
+		// 							 Kd * lambertian * a_Colr1 +
+		// 						   Ks * specular * specularColor);
+
+  	v_Colr1 = a_Colr1;
   }`;
 
 	this.FRAG_SRC = `
@@ -500,17 +502,6 @@ function VBObox1() {
   }`;
 
 	this.vboContents =
-	// new Float32Array([
-	// 	0, 0, 0, 1,
-	// 	1, 0, 0,
-	// 	0, 0, 1,
-	// 	1, 0, 0, 1,
-	// 	1, 0, 0,
-	// 	0, 0, 1,
-	// 	1, 1, 0, 1,
-	// 	1, 0, 0,
-	// 	0, 0, 1
-	// ]);
 	makeSphere2(1, 0, 0);
 
 	this.vboVerts = this.vboContents.length / 10; // # of vertices held in 'vboContents' array;
@@ -630,43 +621,43 @@ VBObox1.prototype.init = function() {
 	//  Find & save the GPU location of all our shaders' attribute-variables and
 	//  uniform-variables (for switchToMe(), adjust(), draw(), reload(), etc.)
   this.a_Pos1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
-  if(this.a_Pos1Loc < 0) {
+  if (this.a_Pos1Loc < 0) {
     console.log(this.constructor.name +
     						'.init() Failed to get GPU location of attribute a_Pos1');
     return -1;
   }
  	this.a_Colr1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Colr1');
-  if(this.a_Colr1Loc < 0) {
+  if (this.a_Colr1Loc < 0) {
     console.log(this.constructor.name +
     						'.init() failed to get the GPU location of attribute a_Colr1');
     return -1;
   }
-  this.a_Normal1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Normal1');
-  if(this.a_Normal1Loc < 0) {
-    console.log(this.constructor.name +
-	    					'.init() failed to get the GPU location of attribute a_Normal1');
-	  return -1;
-  }
+  // this.a_Normal1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Normal1');
+  // if (this.a_Normal1Loc < 0) {
+  //   console.log(this.constructor.name +
+	//     					'.init() failed to get the GPU location of attribute a_Normal1');
+	//   return -1;
+  // }
   // c2) Find All Uniforms:-----------------------------------------------------
   //Get GPU storage location for each uniform var used in our shader programs:
- this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix');
+ 	this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix');
   if (!this.u_ModelMatrixLoc) {
     console.log(this.constructor.name +
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
   }
 	this.u_ProjectionMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ProjectionMatrix');
-   if (!this.u_ProjectionMatrixLoc) {
-     console.log(this.constructor.name +
-     						'.init() failed to get GPU location for u_ProjectionMatrix uniform');
-     return;
-   }
+	if (!this.u_ProjectionMatrixLoc) {
+	  console.log(this.constructor.name +
+	   						'.init() failed to get GPU location for u_ProjectionMatrix uniform');
+	  return;
+	}
 	this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix');
-   if (!this.u_NormalMatrixLoc) {
-     console.log(this.constructor.name +
+  if (!this.u_NormalMatrixLoc) {
+    console.log(this.constructor.name +
      						'.init() failed to get GPU location for u_NormalMatrix uniform');
-     return;
-   }
+    return;
+  }
 }
 
 VBObox1.prototype.switchToMe = function () {
