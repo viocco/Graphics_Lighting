@@ -68,9 +68,9 @@ var theta = 3.15;
 
 function main() {
   g_canvasID = document.getElementById('webgl');
-  aspect = g_canvasID.width / g_canvasID.height;
   g_canvasID.width = window.innerWidth;
   g_canvasID.height = window.innerHeight;
+  aspect = g_canvasID.width / g_canvasID.height;
   // Create the the WebGL rendering context: one giant JavaScript object that
   // contains the WebGL state machine adjusted by large sets of WebGL functions,
   // built-in variables & parameters, and member data. Every WebGL function call
