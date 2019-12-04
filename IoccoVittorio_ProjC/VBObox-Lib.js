@@ -747,104 +747,101 @@ VBObox1.prototype.reload = function() {
 // Phong Shading
 function VBObox2() {
 
-	this.VERT_SRC =	//--------------------- VERTEX SHADER source code
-  'precision highp float;\n' +				// req'd in OpenGL ES if we use 'float'
+	this.VERT_SRC =	`
+  precision highp float;
 
-  'struct MatlT {\n' +    // Describes one Phong material by its reflectances:
-  '   vec3 emit;\n' +     // Ke: emissive -- surface 'glow' amount (r,g,b);
-  '   vec3 ambi;\n' +     // Ka: ambient reflectance (r,g,b)
-  '   vec3 diff;\n' +     // Kd: diffuse reflectance (r,g,b)
-  '   vec3 spec;\n' +     // Ks: specular reflectance (r,g,b)
-  '   int shiny;\n' +     // Kshiny: specular exponent (integer >= 1; typ. <200)
-  '   };\n' +
-  //                                
-  // ATTRIBUTES of each vertex, read from our Vertex Buffer Object
-  'attribute vec4 a_Position; \n' +  
-  'attribute vec4 a_Normal; \n' +     
-  'attribute vec4 a_Color; \n' +
-                    
-  // UNIFORMS: values set from JavaScript before a drawing command.
-  //  'uniform vec3 u_Kd; \n' +           // Phong diffuse reflectance for the 
-                                      // entire shape. Later: as vertex attrib.
-  'uniform MatlT u_MatlSet[1];\n' +   // Array of all materials.
-  'uniform mat4 u_MvpMatrix; \n' +
-  'uniform mat4 u_ModelMatrix; \n' +    // Model matrix
-  'uniform mat4 u_NormalMatrix; \n' +   // Inverse Transpose of ModelMatrix;
-  
-  // VARYING:Vertex Shader values sent per-pixel to Fragment shader:
-  'varying vec3 v_Colr; \n' +             // Phong Lighting: diffuse reflectance
-  'varying vec4 v_Position; \n' +       
-  'varying vec3 v_Normal; \n' +         
-  //'varying vec3 v_Colr; \n' +
-  //-----------------------------------------------------------------------------
-  'void main() { \n' +
-  '  gl_Position = u_ModelMatrix * a_Position;\n' +
-    
-  // Calculate the vertex position & normal vec in the WORLD coordinate system
-  '  v_Position = u_ModelMatrix * a_Position; \n' +
-  '  v_Normal = normalize(vec3(u_NormalMatrix * a_Normal));\n' +
-  //'  v_Colr = u_MatlSet[0].diff; \n' +
-  '  v_Colr = vec3(a_Color); \n' + 
-  //'  a_Color; \n' + 
-  '  u_MvpMatrix; \n' +  
-  '}\n';
+  struct MatlT { // Describes one Phong material by its reflectances:
+     vec3 emit;  // Ke: emissive -- surface 'glow' amount (r,g,b)
+     vec3 ambi;  // Ka: ambient reflectance (r,g,b)
+     vec3 diff;  // Kd: diffuse reflectance (r,g,b)
+     vec3 spec;  // Ks: specular reflectance (r,g,b)
+     int shiny;  // Kshiny: specular exponent (integer >= 1; typ. <200)
+   };
 
-	this.FRAG_SRC = //---------------------- FRAGMENT SHADER source code
+  // ATTRIBUTES
+  attribute vec4 a_Position;
+  attribute vec3 a_Normal;
+  attribute vec3 a_Color;
 
-  'precision highp float;\n' +
-  'precision highp int;\n' +
-  //
-  //--------------- GLSL Struct Definitions:
-  'struct LampT {\n' +    // Describes one point-like Phong light source
-  '   vec3 pos;\n' +      // (x,y,z,w); w==1.0 for local light at x,y,z position
-  '   vec3 ambi;\n' +     // Ia ==  ambient light source strength (r,g,b)
-  '   vec3 diff;\n' +     // Id ==  diffuse light source strength (r,g,b)
-  '   vec3 spec;\n' +     // Is == specular light source strength (r,g,b)
-  '}; \n' +
-  //
-  'struct MatlT {\n' +    // Describes one Phong material by its reflectances:
-  '   vec3 emit;\n' +     // Ke: emissive -- surface 'glow' amount (r,g,b);
-  '   vec3 ambi;\n' +     // Ka: ambient reflectance (r,g,b)
-  '   vec3 diff;\n' +     // Kd: diffuse reflectance (r,g,b)
-  '   vec3 spec;\n' +     // Ks: specular reflectance (r,g,b)
-  '   int shiny;\n' +     // Kshiny: specular exponent (integer >= 1; typ. <200)
-  '   };\n' +
-  //
-  // UNIFORMS: values set from JavaScript before a drawing command.
-  'uniform LampT u_LampSet[1];\n' +   // Array of all light sources.
-  'uniform MatlT u_MatlSet[1];\n' +   // Array of all materials.
-  //
-  'uniform vec3 u_eyePosWorld; \n' +  // Camera/eye location in world coords.
-  
-  // VARYING:Vertex Shader values sent per-pixel to Fragment shader: 
-  'varying vec3 v_Normal;\n' +        // Find 3D surface normal at each pix
-  'varying vec4 v_Position;\n' +      // pixel's 3D pos too -- in 'world' coords
-  'varying vec3 v_Colr; \n' +           // Find diffuse reflectance K_d per pix
-                      
+  // UNIFORMS
+  // uniform vec3 u_Kd;        // Phong diffuse reflectance for the entire shape
+  uniform MatlT u_MatlSet[1];  // Array of all materials
+  uniform mat4 u_MvpMatrix;
+  uniform mat4 u_ModelMatrix;  // Model matrix
+  uniform mat4 u_NormalMatrix; // Inverse Transpose of ModelMatrix
 
-  'void main() { \n' +
-  
-  '  vec3 normal = normalize(v_Normal); \n' +
-  '  vec3 lightDirection = normalize(u_LampSet[0].pos - v_Position.xyz);\n' +
-  '  vec3 eyeDirection = normalize(u_eyePosWorld - v_Position.xyz); \n' +
-  '  float nDotL = max(dot(lightDirection, normal), 0.0); \n' +
-  '  vec3 H = normalize(lightDirection + eyeDirection); \n' +
-  '  float nDotH = max(dot(H, normal), 0.0); \n' + 
-  '  float e64 = pow(nDotH, float(u_MatlSet[0].shiny));\n' +
+  // VARYING
+  varying vec3 v_Colr; // Phong Lighting: diffuse reflectance
+  varying vec3 v_Position;
+  varying vec3 v_Normal;
 
-  //'  vec3 rand = vec3(1,1,1); \n' +
-  /*'  vec3 emissive =  u_MatlSet[0].emit;' +
-  '  vec3 ambient = u_LampSet[0].ambi;\n' + //* u_MatlSet[0].ambi;\n' +
-  '  vec3 diffuse = u_LampSet[0].diff;\n' + //* v_Colr * nDotL;\n' + 
-  '  vec3 speculr = u_LampSet[0].spec;\n' + //*u_MatlSet[0].spec * e64;\n' + */
+  void main() {
+		vec4 vertPos = u_ModelMatrix * a_Position;
+		v_Position = vec3(vertPos) / vertPos.w;
+		v_Normal = vec3(u_NormalMatrix * vec4(a_Normal, 0.0));
+    gl_Position = u_ModelMatrix * a_Position;
 
-  '  vec3 emissive =  u_MatlSet[0].emit;' +
-  '  vec3 ambient =  u_MatlSet[0].ambi;\n' +
-  '  vec3 diffuse = v_Colr * nDotL;\n' + 
-  '  vec3 speculr = u_MatlSet[0].spec * e64;\n' +
+    a_Color;
+    u_MvpMatrix;
+  }`;
 
-  '  gl_FragColor = vec4(emissive + ambient + diffuse + speculr, 1.0);\n' + //vec4(0,0,1,1);\n' +
-  '}\n';
+	this.FRAG_SRC = `
+  precision highp float;
+  precision highp int;
+
+  struct LampT { // Describes one point-like Phong light source
+     vec3 pos;   // (x,y,z,w); w==1.0 for local light at x,y,z position
+     vec3 ambi;  // Ia ==  ambient light source strength (r,g,b)
+     vec3 diff;  // Id ==  diffuse light source strength (r,g,b)
+     vec3 spec;  // Is == specular light source strength (r,g,b)
+  };
+  struct MatlT { // Describes one Phong material by its reflectances:
+     vec3 emit;  // Ke: emissive -- surface 'glow' amount (r,g,b)
+     vec3 ambi;  // Ka: ambient reflectance (r,g,b)
+     vec3 diff;  // Kd: diffuse reflectance (r,g,b)
+     vec3 spec;  // Ks: specular reflectance (r,g,b)
+     int shiny;  // Kshiny: specular exponent (integer >= 1; typ. <200)
+   };
+
+  // UNIFORMS
+  uniform LampT u_LampSet[1]; // Array of all light sources
+  uniform MatlT u_MatlSet[1]; // Array of all materials
+  uniform vec3 u_eyePosWorld; // Camera/eye location in world coords
+
+  // VARYING
+  varying vec3 v_Normal;   // Find 3D surface normal at each pix
+  varying vec3 v_Position; // pixel's 3D pos too -- in 'world' coords
+  varying vec3 v_Colr;     // Find diffuse reflectance K_d per pix
+
+  void main() {
+    vec3 normal = normalize(v_Normal);
+    vec3 lightDirection = normalize(u_LampSet[0].pos - v_Position);
+
+		float lambertian = max(dot(normal, lightDirection), 0.0);
+		float specular = 0.0;
+		if (lambertian > 0.0) {
+			vec3 R = reflect(-lightDirection, normal);
+			vec3 V = normalize(-v_Position);
+			float specAngle = max(dot(R, V), 0.0);
+			specular = pow(specAngle, float(u_MatlSet[0].shiny));
+		}
+
+		// gl_FragColor = vec4(
+		// 	u_MatlSet[0].ambi +
+		// 	u_MatlSet[0].diff * lambertian +
+		// 	u_MatlSet[0].spec * specular,
+		// 	1.0
+		// );
+
+		gl_FragColor = vec4(
+			u_MatlSet[0].ambi * u_LampSet[0].ambi +
+			u_MatlSet[0].diff * u_LampSet[0].diff * lambertian +
+			u_MatlSet[0].spec * specular * u_LampSet[0].spec,
+			1.0
+		);
+
+		u_eyePosWorld;
+  }`;
 
 	this.vboContents = makeSphere2(0, 1, 0);
 
@@ -870,7 +867,7 @@ function VBObox2() {
                                 // attribute named a_Position (4: x,y,z,w values)
   this.vboFcount_a_Color = 3;   // # of floats for this attrib (r,g,b values)
   this.vboFcount_a_Normal = 3;  // # of floats for this attrib (i,j,k values)
-               
+
                //----------------------Attribute offsets
 	this.vboOffset_a_Position = 0;
 	                              //# of bytes from START of vbo to the START
@@ -880,7 +877,7 @@ function VBObox2() {
                                 // == 4 floats * bytes/float
                                 //# of bytes from START of vbo to the START
                                 // of 1st a_Color attrib value in vboContents[]
-  
+
   this.vboOffset_a_Normal = (this.vboFcount_a_Position +
                              this.vboFcount_a_Color) * this.FSIZE;
                                 // == 7 floats * bytes/float
@@ -901,17 +898,17 @@ function VBObox2() {
 	            //---------------------- GPU Locations for Uniform locations &values in our shaders
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
 	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
-  
+
   // ------ Additions ------
   this.eyePosWorld = new Float32Array(3); //x,y,z in world coords
   this.u_eyePosWorldLoc; // GPU location for u_ModelMat uniform
   this.MvpMatrix = new Matrix4(); //Model-view-projection matrix
-  this.u_MvpMatrixLoc; 
+  this.u_MvpMatrixLoc;
   this.NormalMatrix = new Matrix4(); //Transformation matrix for normals
-  this.u_NormalMatrixLoc; 
+  this.u_NormalMatrixLoc;
 
   this.lamp0 = new LightsT();
-  this.matlSel = MATL_PEARL;
+  this.matlSel = MATL_GOLD_DULL;
   this.matl0 = new Material(this.matlSel);
 };
 
@@ -926,9 +923,6 @@ VBObox2.prototype.init = function() {
 //  the vertex data held in our Float32array member 'VBOcontents'.
 // c) Find & save the GPU location of all our shaders' attribute-variables and
 //  uniform-variables (needed by switchToMe(), adjust(), draw(), reload(), etc.)
-//
-// CAREFUL!  before you can draw pictures using this VBObox contents,
-//  you must call this VBObox object's switchToMe() function too!
 
   // a) Compile,link,upload shaders---------------------------------------------
 	this.shaderLoc = createProgram(gl, this.VERT_SRC, this.FRAG_SRC);
@@ -937,8 +931,6 @@ VBObox2.prototype.init = function() {
     						'.init() failed to create executable Shaders on the GPU. Bye!');
     return;
   }
-  // CUTE TRICK: let's print the NAME of this VBObox object: tells us which one!
-  //  else{console.log('You called: '+ this.constructor.name + '.init() fcn!');}
 
 	gl.program = this.shaderLoc;		// (to match cuon-utils.js -- initShaders())
 
@@ -949,29 +941,9 @@ VBObox2.prototype.init = function() {
     						'.init() failed to create VBO in GPU. Bye!');
     return;
   }
-  // Specify the purpose of our newly-created VBO.  Your choices are:
-  //	== "gl.ARRAY_BUFFER" : the VBO holds vertices, each made of attributes
-  // (positions, colors, normals, etc), or
-  //	== "gl.ELEMENT_ARRAY_BUFFER" : the VBO holds indices only; integer values
-  // that each select one vertex from a vertex array stored in another VBO.
-  gl.bindBuffer(gl.ARRAY_BUFFER,	    // GLenum 'target' for this GPU buffer
-  								this.vboLoc);				// the ID# the GPU uses for this buffer.
 
-  // Fill the GPU's newly-created VBO object with the vertex data we stored in
-  //  our 'vboContents' member (JavaScript Float32Array object).
-  //  (Recall gl.bufferData() will evoke GPU's memory allocation & managemt: use
-  //		gl.bufferSubData() to modify VBO contents without changing VBO size)
-  gl.bufferData(gl.ARRAY_BUFFER, 			  // GLenum target(same as 'bindBuffer()')
- 					 				this.vboContents, 		// JavaScript Float32Array
-  							 	gl.STATIC_DRAW);			// Usage hint.
-  //	The 'hint' helps GPU allocate its shared memory for best speed & efficiency
-  //	(see OpenGL ES specification for more info).  Your choices are:
-  //		--STATIC_DRAW is for vertex buffers rendered many times, but whose
-  //				contents rarely or never change.
-  //		--DYNAMIC_DRAW is for vertex buffers rendered many times, but whose
-  //				contents may change often as our program runs.
-  //		--STREAM_DRAW is for vertex buffers that are rendered a small number of
-  // 			times and then discarded; for rapidly supplied & consumed VBOs.
+  gl.bindBuffer(gl.ARRAY_BUFFER, this.vboLoc);
+  gl.bufferData(gl.ARRAY_BUFFER, this.vboContents, 	gl.STATIC_DRAW);
 
   // c1) Find All Attributes:---------------------------------------------------
   //  Find & save the GPU location of all our shaders' attribute-variables and
@@ -1016,18 +988,18 @@ VBObox2.prototype.init = function() {
   this.u_MvpMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_MvpMatrix');
   if (!this.u_MvpMatrixLoc) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_ModelMatrix uniform');
+                '.init() failed to get GPU location for u_MvpMatrix uniform');
     return;
   }
 
   this.u_eyePosWorldLoc = gl.getUniformLocation(this.shaderLoc, 'u_eyePosWorld');
   if (!this.u_eyePosWorldLoc) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_ModelMatrix uniform');
+                '.init() failed to get GPU location for u_eyePosWorld uniform');
     return;
   }
 
-  this.lamp0.u_pos  = gl.getUniformLocation(gl.program, 'u_LampSet[0].pos'); 
+  this.lamp0.u_pos  = gl.getUniformLocation(gl.program, 'u_LampSet[0].pos');
   this.lamp0.u_ambi = gl.getUniformLocation(gl.program, 'u_LampSet[0].ambi');
   this.lamp0.u_diff = gl.getUniformLocation(gl.program, 'u_LampSet[0].diff');
   this.lamp0.u_spec = gl.getUniformLocation(gl.program, 'u_LampSet[0].spec');
@@ -1042,7 +1014,7 @@ VBObox2.prototype.init = function() {
   this.matl0.uLoc_Kd = gl.getUniformLocation(gl.program, 'u_MatlSet[0].diff');
   this.matl0.uLoc_Ks = gl.getUniformLocation(gl.program, 'u_MatlSet[0].spec');
   this.matl0.uLoc_Kshiny = gl.getUniformLocation(gl.program, 'u_MatlSet[0].shiny');
-  if(!this.matl0.uLoc_Ke || !this.matl0.uLoc_Ka || !this.matl0.uLoc_Kd 
+  if(!this.matl0.uLoc_Ke || !this.matl0.uLoc_Ka || !this.matl0.uLoc_Kd
                     || !this.matl0.uLoc_Ks || !this.matl0.uLoc_Kshiny
      ) {
     console.log('Failed to get GPUs Reflectance storage locations');
@@ -1050,18 +1022,13 @@ VBObox2.prototype.init = function() {
   }
   // Position the camera in world coordinates:
   this.eyePosWorld.set([6.0, 0.0, 0.0]);
-  gl.uniform3fv(this.uLoc_eyePosWorld, this.eyePosWorld);// use it to set our uniform
-  // (Note: uniform4fv() expects 4-element float32Array as its 2nd argument)
+  gl.uniform3fv(this.uLoc_eyePosWorld, this.eyePosWorld);
 
   // Init World-coord. position & colors of first light source in global vars;
-  this.lamp0.I_pos.elements.set( [1.0, 1.0, -1.0]);
-  this.lamp0.I_ambi.elements.set([0.2, 0.1, 0.0]);
-  this.lamp0.I_diff.elements.set([0.0, 1.0, 0.0]);
+  this.lamp0.I_pos.elements.set([1.0, 1.0, -1.0]);
+  this.lamp0.I_ambi.elements.set([1.0, 1.0, 1.0]);
+  this.lamp0.I_diff.elements.set([1.0, 1.0, 1.0]);
   this.lamp0.I_spec.elements.set([1.0, 1.0, 1.0]);
-
-  // ( MOVED:  set the GPU's uniforms for lights and materials in draw()
-  //          function, not main(), so they ALWAYS get updated before each
-  //          on-screen re-drawing)
 }
 
 VBObox2.prototype.switchToMe = function() {
@@ -1149,8 +1116,7 @@ VBObox2.prototype.adjust = function() {
 // the GPU; and (if needed) update the VBO's contents, and (if needed) each
 // attribute's stride and offset in VBO.
 
-  // check: was WebGL context set to use our VBO & shader program?
-  if(this.isReady()==false) {
+  if (this.isReady() == false) {
         console.log('ERROR! before' + this.constructor.name +
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
@@ -1162,21 +1128,13 @@ VBObox2.prototype.adjust = function() {
 		g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
 	);
 
-	this.ModelMatrix.scale(1 * aspect, 1, 1);
   this.ModelMatrix.scale(0.8, 0.8, 0.8);
 	this.ModelMatrix.translate(0, 0, 0);
   this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
 
   //  Transfer new uniforms' values to the GPU:--------------------------------
   // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform:
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc,	  // GPU location of the uniform
-  										false, 										// use matrix transpose instead?
-  										this.ModelMatrix.elements);	// send data from Javascript.
-  // Adjust values in VBOcontents array-----------------------------------------
-  // Make one dot-size grow/shrink;
-  this.vboContents[15] = 15.0*(1.0 + Math.cos(Math.PI * 3.0 * g_angleNow2 / 180.0)); // radians
-  // change y-axis value of 1st vertex
-  this.vboContents[1] = g_posNow0;
+  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // Transfer new VBOcontents to GPU--------------------------------------------
   this.reload();
 }
@@ -1184,33 +1142,26 @@ VBObox2.prototype.adjust = function() {
 VBObox2.prototype.draw = function() {
 //=============================================================================
 // Render current VBObox contents.
-  // check: was WebGL context set to use our VBO & shader program?
-  if(this.isReady()==false) {
+  if (this.isReady() == false) {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
 
- // Send fresh 'uniform' values to the GPU:
+ 	// Send fresh 'uniform' values to the GPU:
 
   //---------------For the light source(s):
   gl.uniform3fv(this.lamp0.u_pos,  this.lamp0.I_pos.elements.slice(0,3));
-  //     ('slice(0,3) member func returns elements 0,1,2 (x,y,z) ) 
   gl.uniform3fv(this.lamp0.u_ambi, this.lamp0.I_ambi.elements);   // ambient
   gl.uniform3fv(this.lamp0.u_diff, this.lamp0.I_diff.elements);   // diffuse
   gl.uniform3fv(this.lamp0.u_spec, this.lamp0.I_spec.elements);   // Specular
-//  console.log('lamp0.u_pos',lamp0.u_pos,'\n' );
-//  console.log('lamp0.I_diff.elements', lamp0.I_diff.elements, '\n');
 
   //---------------For the Material object(s):
   gl.uniform3fv(this.matl0.uLoc_Ke, this.matl0.K_emit.slice(0,3));        // Ke emissive
   gl.uniform3fv(this.matl0.uLoc_Ka, this.matl0.K_ambi.slice(0,3));        // Ka ambient
   gl.uniform3fv(this.matl0.uLoc_Kd, this.matl0.K_diff.slice(0,3));        // Kd diffuse
   gl.uniform3fv(this.matl0.uLoc_Ks, this.matl0.K_spec.slice(0,3));        // Ks specular
-  gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny 
+  gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny
   //  == specular exponent; (parseInt() converts from float to base-10 integer).
-// Test our Material object's values:
-//  console.log('matl0.K_emit', matl0.K_emit.slice(0,3), '\n');
-//  console.log('matl0.uLoc_Ke', matl0.uLoc_Ke, '\n'); //
 
   //----------------For the Matrices: find the model matrix:
   this.ModelMatrix.setRotate(90, 0, 1, 0); // Rotate around the y-axis
@@ -1228,7 +1179,7 @@ VBObox2.prototype.draw = function() {
   gl.uniformMatrix4fv(this.uLoc_ModelMatrix, false, this.ModelMatrix.elements);
   gl.uniformMatrix4fv(this.uLoc_MvpMatrix, false, this.MvpMatrix.elements);
   gl.uniformMatrix4fv(this.uLoc_NormalMatrix, false, this.NormalMatrix.elements);
-  // ----------------------------Draw the contents of the currently-bound VBO: 
+  // ----------------------------Draw the contents of the currently-bound VBO:
   gl.drawArrays(gl.TRIANGLE_STRIP, 		    // select the drawing primitive to draw,
                   // choices: gl.POINTS, gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP,
                   //          gl.TRIANGLES, gl.TRIANGLE_STRIP, ...
@@ -1247,4 +1198,3 @@ VBObox2.prototype.reload = function() {
                                       // begins in the VBO.
  					 				this.vboContents);   // the JS source-data array used to fill VBO
 }
-
