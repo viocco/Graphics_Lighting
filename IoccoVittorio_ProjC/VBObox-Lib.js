@@ -101,6 +101,15 @@ As each 'VBObox' object can contain:
 //      I decided there was too little 'common' code that wasn't customized.
 //=============================================================================
 
+//GLOBAL VARIABLES
+var ipos = icolors = inorms = 0;
+var numVertices = 65538;
+var posDimensions = 4;
+var colorsDimensions = 3;
+var normalsDimensions = 3;
+var positions  = new Float32Array(numVertices*posDimensions);
+var float_colors = new Float32Array(numVertices*colorsDimensions);
+var normals = new Float32Array(numVertices*normalsDimensions);
 
 // Ground Plane
 function VBObox0() {
@@ -524,9 +533,46 @@ function VBObox1() {
   //   pos.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
 	// 	pos.push(Math.cos(theta), Math.sin(theta), 1);
   // }
-	this.vboContents =
-	// Sphere
-	makeSphere2(1, 0, 0);
+
+  //-------Vertices---------
+          // X Y Z W | Position (4)
+          // R G B   | Color (3)
+          // I J K   | Normal (3)
+  pos = [];
+  colors = [];
+  norms = [];
+	
+  // Sphere
+	sphere = makeSphere2(1, 0, 0);
+  pos.push.apply(pos,sphere[0]);
+  colors.push.apply(colors,sphere[1]);
+  norms.push.apply(norms,sphere[2]);
+  
+  /* CYLINDER */
+  // Circle: {start: 0, len: (g_step * 2) + 2}
+  /*vertices.push(0, 0, 0, 1);
+  vertices.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+  }
+
+  // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
+    pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
+  } */
+
+
+  appendPositions(pos);
+  appendColors(colors);
+  appendNormals(norms);
+  //console.log(norms);
+  //console.log(colors);
+  this.vboContents = Float32Concat(positions,Float32Concat(float_colors,norms));
+
 	// Tube
 	// new Float32Array(pos.length);
 	// for (var i = 0; i < pos.length; i++) {
@@ -544,27 +590,30 @@ function VBObox1() {
 	// 	1, 0, 0,
 	// 	0, 0, 1
 	// ]);
+  
+  //--------------------- Attribute sizes
+  this.vboFcount_a_Pos1 =  posDimensions;
+  this.vboFcount_a_Colr1 = colorsDimensions;
+  this.vboFcount_a_Normal1 = normalsDimensions;
 
-	this.vboVerts = this.vboContents.length / 10;
+  console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), "number of vertices across positions, colors, and normals vectors not equal");
+	this.vboVerts = pos.length / 4;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
   this.vboBytes = this.vboContents.length * this.FSIZE;
-	this.vboStride = this.vboBytes / this.vboVerts;
+	this.vboStrideColors =  0; //this.vboFcount_a_Colr1 * this.FSIZE;
+  this.vboStridePositions = 0; //this.vboFcount_a_Pos1 * this.FSIZE;
+  this.vboStrideNormals = 0; //this.vboFcount_a_Normal1  * this.FSIZE;
 
-	            //--------------------- Attribute sizes
-  this.vboFcount_a_Pos1 =  4;
-  this.vboFcount_a_Colr1 = 3;
-  this.vboFcount_a_Normal1 = 3;
-  console.assert((this.vboFcount_a_Pos1 +
+ /* console.assert((this.vboFcount_a_Pos1 +
                   this.vboFcount_a_Colr1 +
                   this.vboFcount_a_Normal1) *
                   this.FSIZE == this.vboStride,
-                  "Uh oh! VBObox1.vboStride disagrees with attribute-size values!");
+                  "Uh oh! VBObox1.vboStride disagrees with attribute-size values!"); */
 
               //--------------------- Attribute offsets
 	this.vboOffset_a_Pos1 = 0;
-  this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE;
-  this.vboOffset_a_Normal1 = (this.vboFcount_a_Pos1 +
-                            this.vboFcount_a_Colr1) * this.FSIZE;
+  this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE * numVertices;
+  this.vboOffset_a_Normal1 = (this.vboFcount_a_Pos1 + this.vboFcount_a_Colr1) * this.FSIZE * numVertices;
 
 	            //---------------------- GPU memory locations:
 	this.vboLoc;
@@ -677,7 +726,7 @@ VBObox1.prototype.switchToMe = function () {
 		gl.FLOAT,		  // type == what data type did we use for those numbers?
 		false,				// isNormalized == are these fixed-point values that we need
 									//									normalize before use? true or false
-		this.vboStride,// Stride == #bytes we must skip in the VBO to move from the
+		this.vboStridePositions,// Stride == #bytes we must skip in the VBO to move from the
 		              // stored attrib for this vertex to the same stored attrib
 		              //  for the next vertex in our VBO.  This is usually the
 									// number of bytes used to store one complete vertex.  If set
@@ -689,10 +738,10 @@ VBObox1.prototype.switchToMe = function () {
   								// value we will actually use?  (we start with position).
   gl.vertexAttribPointer(this.a_Colr1Loc, this.vboFcount_a_Colr1,
                          gl.FLOAT, false,
-  						           this.vboStride,  this.vboOffset_a_Colr1);
+  						           this.vboStrideColors,  this.vboOffset_a_Colr1);
   gl.vertexAttribPointer(this.a_Normal1Loc,this.vboFcount_a_Normal1,
                          gl.FLOAT, false,
-							           this.vboStride,	this.vboOffset_a_Normal1);
+							           this.vboStrideNormals,	this.vboOffset_a_Normal1);
   //-- Enable this assignment of the attribute to its' VBO source:
   gl.enableVertexAttribArray(this.a_Pos1Loc);
   gl.enableVertexAttribArray(this.a_Colr1Loc);
@@ -751,6 +800,7 @@ VBObox1.prototype.draw = function() {
   						'.draw() call you needed to call this.switchToMe()!!');
   }
 
+  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
@@ -1076,3 +1126,57 @@ VBObox2.prototype.reload = function() {
                                       // begins in the VBO.
  					 				this.vboContents);   // the JS source-data array used to fill VBO
 }
+
+
+function appendPositions(arr){
+  positions = Float32Edit(positions,arr,ipos);
+  ipos += arr.length;
+  if(ipos > numVertices*posDimensions){
+    console.log('Warning! Appending more than ' + numVertices + ' positions to the VBO will overwrite existing data');
+    console.log('Hint: look at changing numVertices in lib.js');
+  }
+}
+
+function appendColors(arr){
+  float_colors = Float32Edit(float_colors,arr,icolors);
+  icolors += arr.length;
+  if(icolors > numVertices*colorsDimensions){
+    console.log('Warning! Appending more than ' + numVertices + ' positions to the VBO will overwrite existing data');
+    console.log('Hint: look at changing numVertices in lib.js');
+  }
+}
+
+function appendNormals(arr){
+  normals = Float32Edit(normals,arr,inorms);
+  inorms += arr.length;
+  if(inorms > numVertices*normalsDimensions){
+    console.log('Warning! Appending more than ' + numVertices + ' positions to the VBO will overwrite existing data');
+    console.log('Hint: look at changing numVertices in lib.js');
+  }
+}
+
+//concatenate two Float32Arrays
+function Float32Concat(first, second)
+{
+  var firstLength = first.length,
+  result = new Float32Array(firstLength + second.length);
+
+  result.set(first);
+  result.set(second, firstLength);
+
+  return result;
+}
+
+//overwrite the base float32Array with a smaller 'edit' float32array starting at some index
+function Float32Edit(base,edit,startIdx){
+  for(var i = 0; i < edit.length;i++){
+    base[i+startIdx] = edit[i];
+  }
+  return base;
+}
+
+//Concatenate all attributes into a single array
+function CreateVBO(){
+  return Float32Concat(positions,Float32Concat(float_colors,normals));
+}
+
