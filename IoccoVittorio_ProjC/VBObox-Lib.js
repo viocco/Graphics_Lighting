@@ -487,9 +487,14 @@ function VBObox1() {
 			specular = pow(specAngle, shininess);
 		}
 
-  	v_Colr1 = vec3(Ka * ambientColor +
+  	v_Colr1 = vec3(Ka * a_Colr1 * 0.15 +
 									 Kd * lambertian * a_Colr1 +
 								   Ks * specular * specularColor);
+
+		// Testing defaults
+		// v_Colr1 = a_Colr1;
+		// gl_Position = u_ModelMatrix * a_Pos1;
+		// u_ProjectionMatrix; a_Normal1; u_NormalMatrix;
   }`;
 
 	this.FRAG_SRC = `
@@ -499,7 +504,35 @@ function VBObox1() {
 		gl_FragColor = vec4(v_Colr1, 1.0);
   }`;
 
+	// var pos = [];
+	// var g_step = 6;
+	//
+	// pos.push(0, 0, 0, 1);
+  // pos.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+	// pos.push(0, 0, 1);
+  // for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+  //   pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
+  //   pos.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+	// 	pos.push(Math.cos(theta), Math.sin(theta), 0);
+  // }
+  // for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+  //   pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
+	// 	pos.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+	// 	pos.push(Math.cos(theta), Math.sin(theta), 0);
+	//
+  //   pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
+  //   pos.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
+	// 	pos.push(Math.cos(theta), Math.sin(theta), 1);
+  // }
 	this.vboContents =
+	// Sphere
+	makeSphere2(1, 0, 0);
+	// Tube
+	// new Float32Array(pos.length);
+	// for (var i = 0; i < pos.length; i++) {
+	// 	this.vboContents[i] = pos[i];
+	// }
+	// Triangle
 	// new Float32Array([
 	// 	0, 0, 1, 1,
 	// 	1, 0, 0,
@@ -511,7 +544,6 @@ function VBObox1() {
 	// 	1, 0, 0,
 	// 	0, 0, 1
 	// ]);
-	makeSphere2(1, 0, 0);
 
 	this.vboVerts = this.vboContents.length / 10;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
@@ -567,11 +599,8 @@ VBObox1.prototype.init = function() {
     return;
   }
 
-  gl.bindBuffer(gl.ARRAY_BUFFER,
-  								this.vboLoc);
-  gl.bufferData(gl.ARRAY_BUFFER,
- 					 				this.vboContents,
-  							 	gl.STATIC_DRAW);
+  gl.bindBuffer(gl.ARRAY_BUFFER, this.vboLoc);
+  gl.bufferData(gl.ARRAY_BUFFER, this.vboContents, gl.STATIC_DRAW);
 
   this.a_Pos1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Pos1');
   if (this.a_Pos1Loc < 0) {
@@ -692,7 +721,7 @@ var isOK = true;
 }
 
 VBObox1.prototype.adjust = function() {
-  if (this.isReady()==false) {
+  if (this.isReady() == false) {
         console.log('ERROR! before' + this.constructor.name +
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
@@ -706,16 +735,10 @@ VBObox1.prototype.adjust = function() {
 
 	this.ModelMatrix.setTranslate(0, 0, 0);
   this.ModelMatrix.scale(0.8, 0.8, 0.8);
-	this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc,
-		false,
-		this.ModelMatrix.elements);
-	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc,
-		false,
-		this.ProjectionMatrix.elements);
-	gl.uniformMatrix4fv(this.u_NormalMatrixLoc,
-		false,
-		this.ModelMatrix.elements);
+	this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
+  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
+	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
+	gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, this.ModelMatrix.transpose().invert().elements);
 }
 
 VBObox1.prototype.draw = function() {
@@ -729,11 +752,7 @@ VBObox1.prototype.draw = function() {
   }
 
   // ----------------------------Draw the contents of the currently-bound VBO:
-  gl.drawArrays(gl.TRIANGLE_STRIP,		    // select the drawing primitive to draw:
-                  // choices: gl.POINTS, gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP,
-                  //          gl.TRIANGLES, gl.TRIANGLE_STRIP,
-  							0, 								// location of 1st vertex to draw;
-  							this.vboVerts);		// number of vertices to draw on-screen.
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox1.prototype.reload = function() {
