@@ -778,11 +778,13 @@ function VBObox2() {
   void main() {
 		vec4 vertPos = u_ModelMatrix * a_Position;
 		v_Position = vec3(vertPos) / vertPos.w;
-		v_Normal = vec3(u_NormalMatrix * vec4(a_Normal, 0.0));
+		v_Normal = v_Position; // vec3(u_NormalMatrix * vec4(a_Normal, 0.0));
     gl_Position = u_ModelMatrix * a_Position;
 
     a_Color;
     u_MvpMatrix;
+		a_Normal;
+		u_NormalMatrix;
   }`;
 
 	this.FRAG_SRC = `
@@ -826,6 +828,17 @@ function VBObox2() {
 			specular = pow(specAngle, float(u_MatlSet[0].shiny));
 		}
 
+		gl_FragColor = vec4(
+			vec3(0.203125, 0.09765625, 0.0) +
+			vec3(0.796875, 0.3984375, 0.0) * lambertian +
+			vec3(1.0, 1.0, 1.0) * specular,
+			1.0
+		);
+
+		// if (v_Normal.x < -0.25) {
+		// 	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+		// }
+
 		// gl_FragColor = vec4(
 		// 	u_MatlSet[0].ambi +
 		// 	u_MatlSet[0].diff * lambertian +
@@ -833,12 +846,12 @@ function VBObox2() {
 		// 	1.0
 		// );
 
-		gl_FragColor = vec4(
-			u_MatlSet[0].ambi * u_LampSet[0].ambi +
-			u_MatlSet[0].diff * u_LampSet[0].diff * lambertian +
-			u_MatlSet[0].spec * specular * u_LampSet[0].spec,
-			1.0
-		);
+		// gl_FragColor = vec4(
+		// 	u_MatlSet[0].ambi * u_LampSet[0].ambi +
+		// 	u_MatlSet[0].diff * u_LampSet[0].diff * lambertian +
+		// 	u_MatlSet[0].spec * specular * u_LampSet[0].spec,
+		// 	1.0
+		// );
 
 		u_eyePosWorld;
   }`;
@@ -897,7 +910,7 @@ function VBObox2() {
 
 	            //---------------------- GPU Locations for Uniform locations &values in our shaders
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
-	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
+	this.uLoc_ModelMatrix;						// GPU location for u_ModelMat uniform
 
   // ------ Additions ------
   this.eyePosWorld = new Float32Array(3); //x,y,z in world coords
@@ -971,8 +984,8 @@ VBObox2.prototype.init = function() {
 
   // c2) Find All Uniforms:-----------------------------------------------------
   //Get GPU storage location for each uniform var used in our shader programs:
-  this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix');
-  if (!this.u_ModelMatrixLoc) {
+  this.uLoc_ModelMatrix = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix');
+  if (!this.uLoc_ModelMatrix) {
     console.log(this.constructor.name +
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
@@ -1121,21 +1134,29 @@ VBObox2.prototype.adjust = function() {
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
 
-	this.ModelMatrix.setPerspective(30 * aspect, aspect, 1, 100);
-	this.ModelMatrix.lookAt(
+	//----------------For the Matrices: find the model matrix:
+	this.ModelMatrix.setTranslate(0, 0, 0);
+  this.ModelMatrix.scale(0.8, 0.8, 0.8);
+  this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
+  // Calculate the view projection matrix
+  this.MvpMatrix.setPerspective(30 * aspect, aspect, 1, 100);
+  this.MvpMatrix.lookAt(
 		g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
 		g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
-		g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
+		g_perspective_up[0], g_perspective_up[1], g_perspective_up[2]
+		// this.eyePosWorld[0], this.eyePosWorld[1], this.eyePosWorld[2],
+    // 0, 0, 0,
+    // 0, 0, 1
 	);
+  this.MvpMatrix.multiply(this.ModelMatrix);
+  this.NormalMatrix.setInverseOf(this.ModelMatrix);
+  this.NormalMatrix.transpose();
 
-  this.ModelMatrix.scale(0.8, 0.8, 0.8);
-	this.ModelMatrix.translate(0, 0, 0);
-  this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
+  // Send the new matrix values to their locations in the GPU:
+  gl.uniformMatrix4fv(this.uLoc_ModelMatrix, false, this.ModelMatrix.elements);
+  gl.uniformMatrix4fv(this.uLoc_MvpMatrix, false, this.MvpMatrix.elements);
+  gl.uniformMatrix4fv(this.uLoc_NormalMatrix, false, this.NormalMatrix.elements);
 
-  //  Transfer new uniforms' values to the GPU:--------------------------------
-  // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform:
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
-  // Transfer new VBOcontents to GPU--------------------------------------------
   this.reload();
 }
 
@@ -1163,28 +1184,8 @@ VBObox2.prototype.draw = function() {
   gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny
   //  == specular exponent; (parseInt() converts from float to base-10 integer).
 
-  //----------------For the Matrices: find the model matrix:
-  this.ModelMatrix.setRotate(90, 0, 1, 0); // Rotate around the y-axis
-  // Calculate the view projection matrix
-  this.MvpMatrix.setPerspective(30 * aspect, aspect, 1, 100);
-  this.MvpMatrix.lookAt(this.eyePosWorld[0], this.eyePosWorld[1], this.eyePosWorld[2], // eye pos
-                    0,  0, 0,         // aim-point (in world coords)
-                    0,  0, 1);        // up (in world coords)
-  this.MvpMatrix.multiply(this.ModelMatrix);
-  // Calculate the matrix to transform the normal based on the model matrix
-  this.NormalMatrix.setInverseOf(this.ModelMatrix);
-  this.NormalMatrix.transpose();
-
-  // Send the new matrix values to their locations in the GPU:
-  gl.uniformMatrix4fv(this.uLoc_ModelMatrix, false, this.ModelMatrix.elements);
-  gl.uniformMatrix4fv(this.uLoc_MvpMatrix, false, this.MvpMatrix.elements);
-  gl.uniformMatrix4fv(this.uLoc_NormalMatrix, false, this.NormalMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
-  gl.drawArrays(gl.TRIANGLE_STRIP, 		    // select the drawing primitive to draw,
-                  // choices: gl.POINTS, gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP,
-                  //          gl.TRIANGLES, gl.TRIANGLE_STRIP, ...
-  							0, 								// location of 1st vertex to draw;
-  							this.vboVerts);		// number of vertices to draw on-screen.
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox2.prototype.reload = function() {
