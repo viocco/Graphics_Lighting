@@ -63,9 +63,9 @@ var floatsPerVertex = 10;
 
 function makeSphere2(r, g, b) {
   var slices = 12; // # of slices of the sphere along the z axis, including
-  // the south-pole and north pole end caps. ( >=2 req'd)
+  // the south-pole and north pole end caps. ( >=2 req'd) default: 12
   var sliceVerts = 21; // # of vertices around the top edge of the slice
-  // (same number of vertices on bottom of slice, too)
+  // (same number of vertices on bottom of slice, too) default: 21
   // (HINT: odd# or prime#s help avoid accidental symmetry)
   var topColr = new Float32Array([0.3, 0.3, 0.3]); // South Pole: dark-gray
   var botColr = new Float32Array([0.8, 0.8, 0.8]); // North Pole: light-gray.
@@ -127,6 +127,7 @@ function makeSphere2(r, g, b) {
         sphVerts[j] = cosBot * Math.cos(Math.PI * v / sliceVerts); // x
         sphVerts[j + 1] = cosBot * Math.sin(Math.PI * v / sliceVerts); // y
         sphVerts[j + 2] = sinBot; // z
+        sphVerts[j + 3] = 1;
       } else { // put vertices with odd-numbered v at the the slice's top edge
         // (why PI and not 2*PI? because 0 <= v < 2*sliceVerts
         // and thus we can simplify cos(2*PI* ((v-1)/2)*sliceVerts)
@@ -136,15 +137,14 @@ function makeSphere2(r, g, b) {
         sphVerts[j + 2] = sinTop; // z
         sphVerts[j + 3] = 1;
       }
-      sphVerts[j + 4] = r;
-      sphVerts[j + 5] = g;
-      sphVerts[j + 6] = b;
+      sphVerts[j + 4] = Math.random(); // r;
+      sphVerts[j + 5] = Math.random(); // g;
+      sphVerts[j + 6] = Math.random(); // b;
 
       sphVerts[j + 7] = sphVerts[j];
       sphVerts[j + 8] = sphVerts[j + 1];
       sphVerts[j + 9] = sphVerts[j + 2];
     }
   }
-  console.log(sphVerts);
   return sphVerts;
 }
