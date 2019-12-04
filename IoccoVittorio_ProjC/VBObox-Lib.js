@@ -596,7 +596,9 @@ function VBObox1() {
   this.vboFcount_a_Colr1 = colorsDimensions;
   this.vboFcount_a_Normal1 = normalsDimensions;
 
-  console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), "number of vertices across positions, colors, and normals vectors not equal");
+  console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), 
+              "Number of vertices across positions, colors, and normals vectors not equal");
+  
 	this.vboVerts = pos.length / 4;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
   this.vboBytes = this.vboContents.length * this.FSIZE;
