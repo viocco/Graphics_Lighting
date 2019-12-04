@@ -778,7 +778,9 @@ function VBObox2() {
   void main() {
 		vec4 vertPos = u_ModelMatrix * a_Position;
 		v_Position = vec3(vertPos) / vertPos.w;
-		v_Normal = v_Position; // vec3(u_NormalMatrix * vec4(a_Normal, 0.0));
+		// TODO: Use u_NormalMatrix
+		//  Currently causes lambertian & specular to be < 0
+		v_Normal = vec3(u_ModelMatrix * vec4(a_Normal, 0.0));
     gl_Position = u_ModelMatrix * a_Position;
 
     a_Color;
@@ -829,29 +831,11 @@ function VBObox2() {
 		}
 
 		gl_FragColor = vec4(
-			vec3(0.203125, 0.09765625, 0.0) +
-			vec3(0.796875, 0.3984375, 0.0) * lambertian +
-			vec3(1.0, 1.0, 1.0) * specular,
+			u_MatlSet[0].ambi * u_LampSet[0].ambi +
+			u_MatlSet[0].diff * u_LampSet[0].diff * lambertian +
+			u_MatlSet[0].spec * specular * u_LampSet[0].spec,
 			1.0
 		);
-
-		// if (v_Normal.x < -0.25) {
-		// 	gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-		// }
-
-		// gl_FragColor = vec4(
-		// 	u_MatlSet[0].ambi +
-		// 	u_MatlSet[0].diff * lambertian +
-		// 	u_MatlSet[0].spec * specular,
-		// 	1.0
-		// );
-
-		// gl_FragColor = vec4(
-		// 	u_MatlSet[0].ambi * u_LampSet[0].ambi +
-		// 	u_MatlSet[0].diff * u_LampSet[0].diff * lambertian +
-		// 	u_MatlSet[0].spec * specular * u_LampSet[0].spec,
-		// 	1.0
-		// );
 
 		u_eyePosWorld;
   }`;
@@ -921,7 +905,7 @@ function VBObox2() {
   this.u_NormalMatrixLoc;
 
   this.lamp0 = new LightsT();
-  this.matlSel = MATL_GOLD_DULL;
+  this.matlSel = MATL_GOLD_SHINY;
   this.matl0 = new Material(this.matlSel);
 };
 
@@ -1038,7 +1022,7 @@ VBObox2.prototype.init = function() {
   gl.uniform3fv(this.uLoc_eyePosWorld, this.eyePosWorld);
 
   // Init World-coord. position & colors of first light source in global vars;
-  this.lamp0.I_pos.elements.set([1.0, 1.0, -1.0]);
+  this.lamp0.I_pos.elements.set([1.0, 1.0, 1.0]);
   this.lamp0.I_ambi.elements.set([1.0, 1.0, 1.0]);
   this.lamp0.I_diff.elements.set([1.0, 1.0, 1.0]);
   this.lamp0.I_spec.elements.set([1.0, 1.0, 1.0]);
@@ -1135,12 +1119,9 @@ VBObox2.prototype.adjust = function() {
   }
 
 	//----------------For the Matrices: find the model matrix:
-	this.ModelMatrix.setTranslate(0, 0, 0);
-  this.ModelMatrix.scale(0.8, 0.8, 0.8);
-  this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
   // Calculate the view projection matrix
-  this.MvpMatrix.setPerspective(30 * aspect, aspect, 1, 100);
-  this.MvpMatrix.lookAt(
+  this.ModelMatrix.setPerspective(30 * aspect, aspect, 1, 100);
+  this.ModelMatrix.lookAt(
 		g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
 		g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
 		g_perspective_up[0], g_perspective_up[1], g_perspective_up[2]
@@ -1148,7 +1129,12 @@ VBObox2.prototype.adjust = function() {
     // 0, 0, 0,
     // 0, 0, 1
 	);
-  this.MvpMatrix.multiply(this.ModelMatrix);
+
+	this.ModelMatrix.translate(0, 0, 0);
+  this.ModelMatrix.scale(0.8, 0.8, 0.8);
+  this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
+  // this.MvpMatrix.multiply(this.ModelMatrix);
+
   this.NormalMatrix.setInverseOf(this.ModelMatrix);
   this.NormalMatrix.transpose();
 
