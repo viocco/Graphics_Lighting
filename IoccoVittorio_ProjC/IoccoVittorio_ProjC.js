@@ -323,40 +323,49 @@ function initGui() {
 function initVBO() {
   pos = [];
   colors = [];
+  norms = [];
 
   /* CYLINDER */
   // Circle: {start: 0, len: (g_step * 2) + 2}
   pos.push(0, 0, 0, 1);
-  colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+  colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+  norms.push(0, 0, 0);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
 
   // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
-    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
 
   /* CONE */
   // Tip: {start: (g_step * 6) + 4, len: 1}
   pos.push(0, 0, 1, 1);
   colors.push(19.0/255.0, 120.0/255.0, 46.0/255.0, 1);
+  norms.push(0, 0, 1);
   // Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0, 1);
+    colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
 
   // Green Tube: {start: (g_step * 8) + 7, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
-    colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0, 1);
-    colors.push(16.0/255.0, 163.0/255.0, 55.0/255.0, 1);
+    colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
+    colors.push(16.0/255.0, 163.0/255.0, 55.0/255.0);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
 
   /* Order of push:
@@ -468,6 +477,7 @@ function initVBO() {
              0.86, 0.02, 0.0, 1.0, // vertex 46
              0.86, 0.06, 0.0, 1.0); // vertex 47
 
+   // Push first two wings in reverse
   var pos_length = pos.length;
   for (var c = pos_length - 1; c >= wing_start * 4; c -= 4) {
     pos.push(pos[c - 3], pos[c - 2], pos[c - 1], pos[c]);
@@ -475,59 +485,68 @@ function initVBO() {
 
   var pos_length2 = pos.length;
   for (var c = pos_length2 - 1; c >= wing_start * 4; c -= 64) {
-    colors.push(.05, .10, .55, 1);
-    colors.push(0.5, 0.7, 1, 0);
-    colors.push(0.5, 0.7, 1, 0);
-    colors.push(.05, .10, .55, 1);
-    colors.push(51/255, 171/255, 249/255, 1);
-    colors.push(0.5, 0.7, 1, 0);
-    colors.push(0.5, 0.7, 1, 0);
-    colors.push(51/255, 171/255, 249/255, 1);
-    colors.push(.05, .10, .55, 1);
-    colors.push(.05, .10, .55, 1);
-    colors.push(51/255, 171/255, 249/255, 1);
-    colors.push(0.5, 0.7, 1, 0)
-    colors.push(.05, .10, .55, 1);
-    colors.push(0.5, 0.7, 1, 0)
-    colors.push(0.5, 0.7, 1, 0)
-    colors.push(.05, .10, .55, 1);
+    colors.push(.05, .10, .55);
+    colors.push(0.5, 0.7, 1);
+    colors.push(0.5, 0.7, 1);
+    colors.push(.05, .10, .55);
+    colors.push(51/255, 171/255, 249/255);
+    colors.push(0.5, 0.7, 1);
+    colors.push(0.5, 0.7, 1);
+    colors.push(51/255, 171/255, 249/255);
+    colors.push(.05, .10, .55);
+    colors.push(.05, .10, .55);
+    colors.push(51/255, 171/255, 249/255);
+    colors.push(0.5, 0.7, 1)
+    colors.push(.05, .10, .55);
+    colors.push(0.5, 0.7, 1)
+    colors.push(0.5, 0.7, 1)
+    colors.push(.05, .10, .55);
   }
   // Compensate for the fact that wings only have 47 vertices
-  while (colors.length > pos.length) {
+  while (colors.length / 3 > pos.length / 4) {
     colors.pop();
+  }
+
+  while (norms.length / 3 < pos.length / 4) {
+    norms.push(0, 0, 1);
   }
 
    /* ABDOMEN */
 
    // Circle: {start: 188, len: (g_step * 2) + 2}
    pos.push(0, 0, 0, 1);
-   colors.push(.03, .13, .29, 1);
+   colors.push(.03, .13, .29);
+   norms.push(0, 0, 0);
    for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
      pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
-     colors.push(.03, .25, .68, 1);
-     //colors.push(.4, .5, .6, 1);
+     colors.push(.03, .25, .68);
+     norms.push(Math.cos(theta), 0, Math.sin(theta));
    }
 
   // Brown Tube: {start: 206, len: (g_step * 4) + 2}
    for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
      pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
      pos.push(Math.cos(theta), 1, Math.sin(theta), 1);
-     colors.push(.03, .13, (theta-.9*theta)%255, 1);
-     colors.push(.03, (.13*theta)%255, (theta-.7*theta)%255, 1);
+     colors.push(.03, .13, (theta - .9 * theta) % 255);
+     colors.push(.03, (.13 * theta) % 255, (theta - .7 * theta) % 255);
+     norms.push(Math.cos(theta), 0, Math.sin(theta));
+     norms.push(Math.cos(theta), 1, Math.sin(theta));
 
    }
-   while (colors.length > pos.length) { // Just in case, ran in to some trouble here earlier
+   while (colors.length / 3 > pos.length / 4) { // Just in case, ran in to some trouble here earlier
      colors.pop();
    }
 
    // Cone Tip: {start: (g_step * 6) + 4, len: 1}
    pos.push(0, 1, 0, 1);
-   colors.push(.03, .13, .29, 1);
+   colors.push(.03, .13, .29);
+   norms.push(0, 1, 0);
 
    // Cone Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
    for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
      pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
-     colors.push(.03, .13, .29, 1);
+     colors.push(.03, .13, .29);
+     norms.push(Math.cos(theta), 0, Math.sin(theta));
    }
 
    // Head cube: {start: (g_step * 8) + 7, len: 9}
@@ -550,95 +569,38 @@ function initVBO() {
              0, 0, 0, 1,
              0, 0, 1, 1);
   for (var i = 0; i < 9; i++) {
-     colors.push(.03, .13, .29, 1);
-     colors.push(.05, .40, .55, 1);
-
+     colors.push(.03, .13, .29);
+     colors.push(.05, .40, .55);
+     norms.push(0, 0, 1);
+     norms.push(0, 0, 1);
   }
 
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
   var sphereVerts = makeSphere2(12, 21);
   sphereStart = (pos.length / 4) - 1;
-  sphereLen = sphereVerts.length / 7;
-  for (var i = 0; i < sphereLen * 7; i += 7) {
-    pos.push(sphereVerts[i], sphereVerts[i+1], sphereVerts[i+2], sphereVerts[i+3]);
-    if (i >= sphereVerts.length / 2) {
-      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-    }
-    else {
-      colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
-    }
-  }
+  sphereLen = sphereVerts[0].length / 4;
+  pos.push.apply(pos, sphereVerts[0]);
+  colors.push.apply(colors, sphereVerts[1]);
+  norms.push.apply(norms, sphereVerts[2]);
 
   // Sphere (eyes): {start: sphereStart, len: sphereLen}
   sphereVerts = makeSphere2(4, 21);
   sphereStart2 = (pos.length / 4) - 1;
   sphereLen2 = sphereVerts.length / 7;
-  for (var i = 0; i < sphereLen * 7; i += 7) {
-    pos.push(sphereVerts[i], sphereVerts[i+1], sphereVerts[i+2], sphereVerts[i+3]);
-    if (Math.random() < 0.25) {
-      colors.push(0, 0, 0, 1);
-    } else {
-      colors.push(1, 1, 1, 1);
-    }
-  }
-
-  // Ground Grid: Self-Explanatory
-  var xcount = 1500;
-  var zcount = 1500;
-  var xzmax = 50.0;
-  var v = 0;
-  var j = 0;
-  gndVerts = new Float32Array(4 * 2 * (xcount + zcount));
-  gndCols = new Float32Array(4 * 2 * (xcount + zcount));
-
-  var xgap = xzmax / (xcount - 1);
-  var zgap = xzmax / (zcount - 1);
-  for(v = 0, j = 0; v < 2 * xcount; v++, j += 4) {
-    if (v % 2 == 0) {
-      gndVerts[j  ] = -xzmax + (v) * xgap;
-      gndVerts[j+1] = -xzmax;
-      gndVerts[j+2] = 0.0;
-      gndVerts[j+3] = 1.0;
-    }
-    else {
-      gndVerts[j  ] = -xzmax + (v - 1) * xgap;
-      gndVerts[j+1] = xzmax;
-      gndVerts[j+2] = 0.0;
-      gndVerts[j+3] = 1.0;
-    }
-  }
-  for(v = 0; v < 2 * zcount; v++, j += 4) {
-    if (v % 2 == 0) {
-      gndVerts[j  ] = -xzmax;
-      gndVerts[j+1] = -xzmax + (v) * zgap;
-      gndVerts[j+2] = 0.0;
-      gndVerts[j+3] = 1.0;
-    }
-    else {
-      gndVerts[j  ] = xzmax;
-      gndVerts[j+1] = -xzmax + (v - 1) * zgap;
-      gndVerts[j+2] = 0.0;
-      gndVerts[j+3] = 1.0;
-    }
-  }
-  for (var i = 0; i < gndCols.length; i += 4) {
-    gndCols[i  ] = 0 / 255;
-    gndCols[i+1] = 40 / 255;
-    gndCols[i+2] = 80 / 255;
-    gndCols[i+3] = 1;
-  }
-
-  pos.push.apply(pos,gndVerts);
-  colors.push.apply(colors,gndCols);
+  pos.push.apply(pos, sphereVerts[0]);
+  colors.push.apply(colors, sphereVerts[1]);
+  norms.push.apply(norms, sphereVerts[2]);
 
   // Lilypad Circle: {start: 1384 + gndverts.length, len: (8.5 * 2) + 2}
   pos.push(0, 0, 0, 1);
-  lilyStart = 1384 + gndVerts.length/4;
+  lilyStart = 1384;
   lilyLen = (8.5*2)+3;
-  colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+  colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+  norms.push(0, 0, 1);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/8.5); theta += Math.PI/8.5) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    colors.push(20/255, (theta+110)/255.0, 10/255, 1);
+    colors.push(20/255, (theta+110)/255.0, 10/255);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
@@ -650,52 +612,28 @@ function initVBO() {
   pos.push(-.3,1,.4,1);
   pos.push(0,0,0,1);
 
-  colors.push(127/255,0/255,43/255,1);
-  colors.push(255/255,20/255,147/255,1);
-  colors.push(255/255,192/255,203/255,1);
-  colors.push(127/255,0/255,43/255,1);
-  colors.push(255/255,20/255,147/255,1);
-  colors.push(255/255,192/255,203/255,1);
+  colors.push(127/255,0/255,43/255);
+  colors.push(255/255,20/255,147/255);
+  colors.push(255/255,192/255,203/255);
+  colors.push(127/255,0/255,43/255);
+  colors.push(255/255,20/255,147/255);
+  colors.push(255/255,192/255,203/255);
 
-  // Shere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
+  norms.push(.3,1,.7);
+  norms.push(-.3,1,.7);
+  norms.push(0,0,0);
+  norms.push(.3,1,.4);
+  norms.push(-.3,1,.4);
+  norms.push(0,0,0);
+
+  // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;
   sphereVerts = makeSphere2(12, 21);
   sphereStart3 = lilyStart + lilyLen + 6;
-  sphereLen3 = sphereVerts.length / 7;
-  for (var i = 0; i < sphereLen3 * 7; i += 7) {
-    pos.push(sphereVerts[i], sphereVerts[i+1], sphereVerts[i+2], sphereVerts[i+3]);
-    if (i >= sphereVerts.length / 2 && test) {
-      colors.push(247.0/255.0, 246.0/255.0, 158.0/255.0, 1);
-      test = !test;
-    }
-    else if (i >= sphereVerts.length / 2 && !test) {
-      colors.push(245.0/255.0, 203.0/255.0, 158.0/255.0, 1);
-      test = !test;
-    }
-    else if (test) {
-      colors.push(245.0/255.0, 203.0/255.0, 242.0/255.0, 1);
-      test = !test;
-    }
-    else {
-      colors.push(247.0/255.0, 246.0/255.0, 158.0/255.0, 1);
-      test = !test;
-    }
-  }
-
-  //World Coordinate Axes {start: sphereStart3 + sphereLen3, len = 6}
-  pos.push(0,0,0,1); //x+ axis
-  pos.push(1,0,0,1);  //x- axis
-  pos.push(0,1,0,1); //y+ axis
-  pos.push(0,0,0,1);  //y- axis
-  pos.push(0,0,0,1); //z+ axis
-  pos.push(0,0,1,1);  //z- axis
-
-  colors.push(255/255,0/255,0/255,1);
-  colors.push(255/255,0/255,0/255,1);
-  colors.push(0/255,100/255,0/255,1);
-  colors.push(0/255,100/255,0/255,1);
-  colors.push(0/255,0/255,255/255,1);
-  colors.push(0/255,0/255,255/255,1);
+  sphereLen3 = sphereVerts[0].length / 4;
+  pos.push.apply(pos, sphereVerts[0]);
+  colors.push.apply(colors, sphereVerts[1]);
+  norms.push.apply(norms, sphereVerts[2]);
 
   // Fallen log
   var logStep = g_step * 2;
@@ -705,28 +643,31 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
     var color_randomizer = Math.random();
     if (color_randomizer < 0.4) {
-      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-      colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
+      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
+      colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
     } else if (color_randomizer < 0.8) {
-      colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
-      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+      colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
+      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     } else {
-      colors.push(85.0/255.0, 53.0/255.0, 22.0/255.0, 1);
-      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+      colors.push(85.0/255.0, 53.0/255.0, 22.0/255.0);
+      colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     }
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
   logCap = pos.length / 4;
   pos.push(0, 0, 0, 1);
-  colors.push(0.87, 0.52, 0.21, 1);
+  colors.push(0.87, 0.52, 0.21);
+  norms.push(0, 0, 0);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/logStep); theta += Math.PI/logStep) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    // colors.push(0.9, 0.63, 0.38, 1);
     var color_randomizer = Math.random();
     if (color_randomizer < 0.4) {
-      colors.push(0.9, 0.63, 0.38, 1);
+      colors.push(0.9, 0.63, 0.38);
     } else {
-      colors.push(0.87, 0.52, 0.21, 1);
+      colors.push(0.87, 0.52, 0.21);
     }
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
   logEnd = pos.length / 4;
 
@@ -743,15 +684,26 @@ function initVBO() {
     0.65, -0.3, 0.2, 1,
     0.75, 0, 0.2, 1,
   );
+  norms.push(
+    0, 0, 0.4, // Fan center
+    0.75, 0, 0.2,
+    0.55, 0.25, 0.2,
+    0.1, 0.4, 0.2,
+    -0.25, 0.25, 0.2,
+    -0.3, -0.25, 0.2,
+    0.2, -0.4, 0.2,
+    0.65, -0.3, 0.2,
+    0.75, 0, 0.2,
+  );
   rockMid = pos.length / 4;
   var len = rockMid - rockStart;
   for (var i = 0; i < len; i++) {
     var l = i * 2 / len;
     if (l <= 1) {
-      colors.push(lerp(128, 102, l)/255.0, lerp(132, 106, l)/255.0, lerp(135, 108, l)/255.0, 1);
+      colors.push(lerp(128, 102, l)/255.0, lerp(132, 106, l)/255.0, lerp(135, 108, l)/255.0);
     }
     else {
-      colors.push(lerp(102, 128, l - 1)/255.0, lerp(106, 132, l - 1)/255.0, lerp(108, 135, l - 1)/255.0, 1);
+      colors.push(lerp(102, 128, l - 1)/255.0, lerp(106, 132, l - 1)/255.0, lerp(108, 135, l - 1)/255.0);
     }
   }
   pos.push(
@@ -772,15 +724,33 @@ function initVBO() {
     0.75, 0, 0.2, 1,
     0.7, 0, 0, 1,
   );
+  norms.push(
+    0.75, 0, 0.2,
+    0.7, 0, 0,
+    0.55, 0.25, 0.2,
+    0.45, 0.2, 0,
+    0.1, 0.4, 0.2,
+    0.1, 0.3, 0,
+    -0.25, 0.25, 0.2,
+    -0.15, 0.25, 0,
+    -0.3, -0.25, 0.2,
+    -0.2, -0.2, 0,
+    0.2, -0.4, 0.2,
+    0.2, -0.3, 0,
+    0.65, -0.3, 0.2,
+    0.55, -0.25, 0,
+    0.75, 0, 0.2,
+    0.7, 0, 0,
+  );
   rockEnd = pos.length / 4;
   len = rockEnd - rockMid;
   for (var i = 0; i < len; i++) {
     var l = i * 2 / len;
     if (l <= 1) {
-      colors.push(lerp(128, 102, l)/255.0, lerp(132, 106, l)/255.0, lerp(135, 108, l)/255.0, 1);
+      colors.push(lerp(128, 102, l)/255.0, lerp(132, 106, l)/255.0, lerp(135, 108, l)/255.0);
     }
     else {
-      colors.push(lerp(102, 128, l - 1)/255.0, lerp(106, 132, l - 1)/255.0, lerp(108, 135, l - 1)/255.0, 1);
+      colors.push(lerp(102, 128, l - 1)/255.0, lerp(106, 132, l - 1)/255.0, lerp(108, 135, l - 1)/255.0);
     }
   }
 
