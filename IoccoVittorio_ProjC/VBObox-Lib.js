@@ -1141,31 +1141,31 @@ VBObox2.prototype.switchToMe = function() {
   // 	Here's how to use the almost-identical OpenGL version of this function:
 	//		http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribPointer.xml )
   gl.vertexAttribPointer(
-		this.a_PositionLoc,//index == ID# for the attribute var in GLSL shader pgm;
-		this.vboFcount_a_Position, // # of floats used by this attribute: 1,2,3 or 4?
-		gl.FLOAT,		  // type == what data type did we use for those numbers?
-		false,				// isNormalized == are these fixed-point values that we need
-									//									normalize before use? true or false
-		this.vboStride,// Stride == #bytes we must skip in the VBO to move from the
-		              // stored attrib for this vertex to the same stored attrib
-		              //  for the next vertex in our VBO.  This is usually the
-									// number of bytes used to store one complete vertex.  If set
-									// to zero, the GPU gets attribute values sequentially from
-									// VBO, starting at 'Offset'.	 (Our vertex size in bytes:
-									// 4 floats for Position + 3 for Color + 1 for Normal = 8).
-		this.vboOffset_a_Position);
-		              // Offset == how many bytes from START of buffer to the first
-  								// value we will actually use?  (We start with a_Position).
-  gl.vertexAttribPointer(this.a_ColorLoc, this.vboFcount_a_Color,
-              gl.FLOAT, false,
-  						this.vboStride, this.vboOffset_a_Color);
-  gl.vertexAttribPointer(this.a_NormalLoc, this.vboFcount_a_Normal,
-              gl.FLOAT, false,
-							this.vboStride, this.vboOffset_a_Normal);
-// --Enable this assignment of each of these attributes to its' VBO source:
-  gl.enableVertexAttribArray(this.a_PositionLoc);
-  gl.enableVertexAttribArray(this.a_ColorLoc);
-  gl.enableVertexAttribArray(this.a_NormalLoc);
+    this.a_Pos1Loc,//index == ID# for the attribute var in GLSL shader pgm;
+    this.vboFcount_a_Pos1, // # of floats used by this attribute: 1,2,3 or 4?
+    gl.FLOAT,     // type == what data type did we use for those numbers?
+    false,        // isNormalized == are these fixed-point values that we need
+                  //                  normalize before use? true or false
+    this.vboStridePositions,// Stride == #bytes we must skip in the VBO to move from the
+                  // stored attrib for this vertex to the same stored attrib
+                  //  for the next vertex in our VBO.  This is usually the
+                  // number of bytes used to store one complete vertex.  If set
+                  // to zero, the GPU gets attribute values sequentially from
+                  // VBO, starting at 'Offset'.
+                  // (Our vertex size in bytes: 4 floats for pos + 3 for color)
+    this.vboOffset_a_Pos1);
+                  // Offset == how many bytes from START of buffer to the first
+                  // value we will actually use?  (we start with position).
+  gl.vertexAttribPointer(this.a_Colr1Loc, this.vboFcount_a_Colr1,
+                         gl.FLOAT, false,
+                         this.vboStrideColors,  this.vboOffset_a_Colr1);
+  gl.vertexAttribPointer(this.a_Normal1Loc,this.vboFcount_a_Normal1,
+                         gl.FLOAT, false,
+                         this.vboStrideNormals, this.vboOffset_a_Normal1);
+  //-- Enable this assignment of the attribute to its' VBO source:
+  gl.enableVertexAttribArray(this.a_Pos1Loc);
+  gl.enableVertexAttribArray(this.a_Colr1Loc);
+  gl.enableVertexAttribArray(this.a_Normal1Loc);
 }
 
 VBObox2.prototype.isReady = function() {
