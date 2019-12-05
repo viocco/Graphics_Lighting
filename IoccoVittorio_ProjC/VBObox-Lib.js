@@ -802,7 +802,7 @@ VBObox1.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
-
+  this.ModelMatrix.translate(0, 0, 2);
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
@@ -935,7 +935,6 @@ function VBObox2() {
   //appendNormals(norms);
 
   this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
-
 
   //--------------------- Attribute sizes
   this.vboFcount_a_Pos1 =  posDimensions;
@@ -1352,6 +1351,5 @@ function CreateVBO(){
   appendColors(colors);
   appendNormals(norms);
   vertexCount = pos.length;
-  //console.log(norms);
   //console.log(colors);
 }
