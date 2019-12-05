@@ -100,6 +100,7 @@ function main() {
   part2Box.init(gl);
 
   gl.clearColor(0.2, 0.2, 0.2, 1);
+  gl.enable(gl.DEPTH_TEST);
 
   window.addEventListener("keydown", myKeyDown, false);
 
@@ -158,7 +159,7 @@ function timerAll() {
 }
 
 function drawAll() {
-  gl.clear(gl.COLOR_BUFFER_BIT);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   var b4Draw = Date.now();
   var b4Wait = b4Draw - g_lastMS;

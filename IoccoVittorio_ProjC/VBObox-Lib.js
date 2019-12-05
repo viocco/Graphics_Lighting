@@ -103,7 +103,8 @@ As each 'VBObox' object can contain:
 
 //GLOBAL VARIABLES
 var ipos = icolors = inorms = 0;
-var numVertices = 65538;
+var numVertices = 65536;
+var vertexCount = 0;
 var posDimensions = 4;
 var colorsDimensions = 3;
 var normalsDimensions = 3;
@@ -534,7 +535,7 @@ function VBObox1() {
 	// 	pos.push(Math.cos(theta), Math.sin(theta), 1);
   // }
 
-  //-------Vertices---------
+  /*//-------Vertices---------
           // X Y Z W | Position (4)
           // R G B   | Color (3)
           // I J K   | Normal (3)
@@ -563,15 +564,15 @@ function VBObox1() {
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
     colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
-  } */
+  } 
 
 
   appendPositions(pos);
   appendColors(colors);
   appendNormals(norms);
   //console.log(norms);
-  //console.log(colors);
-  this.vboContents = Float32Concat(positions,Float32Concat(float_colors,norms));
+  //console.log(colors); */
+  this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
 
 	// Tube
 	// new Float32Array(pos.length);
@@ -596,10 +597,10 @@ function VBObox1() {
   this.vboFcount_a_Colr1 = colorsDimensions;
   this.vboFcount_a_Normal1 = normalsDimensions;
 
-  console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), 
-              "Number of vertices across positions, colors, and normals vectors not equal");
+  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), 
+  //           "Number of vertices across positions, colors, and normals vectors not equal");
   
-	this.vboVerts = pos.length / 4;
+	this.vboVerts = vertexCount / 4;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
   this.vboBytes = this.vboContents.length * this.FSIZE;
 	this.vboStrideColors =  0; //this.vboFcount_a_Colr1 * this.FSIZE;
@@ -915,9 +916,36 @@ function VBObox2() {
 		u_eyePosWorld;
   }`;
 
-	this.vboContents = new Float32Array(); // makeSphere2(0, 1, 0);
+  //-------Vertices---------
+          // X Y Z W | Position (4)
+          // R G B   | Color (3)
+          // I J K   | Normal (3)
+  //pos = [];
+  //colors = [];
+  //norms = [];
+  
+  // Sphere
+  //sphere = makeSphere2(1, 0, 0);
+  //pos.push.apply(pos,sphere[0]);
+  //colors.push.apply(colors,sphere[1]);
+  //norms.push.apply(norms,sphere[2]);
 
-	this.vboVerts = this.vboContents.length / 10;							// # of vertices held in 'vboContents' array;
+  //appendPositions(pos); 
+  //appendColors(colors);
+  //appendNormals(norms);
+
+  this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
+
+
+  //--------------------- Attribute sizes
+  this.vboFcount_a_Pos1 =  posDimensions;
+  this.vboFcount_a_Colr1 = colorsDimensions;
+  this.vboFcount_a_Normal1 = normalsDimensions;
+
+  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), 
+  //            "Number of vertices across positions, colors, and normals vectors not equal");
+  
+  this.vboVerts = vertexCount / 4;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
 	                              // bytes req'd by 1 vboContents array element;
 																// (why? used to compute stride and offset
@@ -925,32 +953,18 @@ function VBObox2() {
   this.vboBytes = this.vboContents.length * this.FSIZE;
                                 // (#  of floats in vboContents array) *
                                 // (# of bytes/float).
-	this.vboStride = this.vboBytes / this.vboVerts;
-	                              // From any attrib in a given vertex,
-	                              // move forward by 'vboStride' bytes to arrive
-	                              // at the same attrib for the next vertex.
-	                              // (== # of bytes used to store one vertex)
+	
+  //Attribute Strides
+  this.vboStrideColors =  0; //this.vboFcount_a_Colr1 * this.FSIZE;
+  this.vboStridePositions = 0; //this.vboFcount_a_Pos1 * this.FSIZE;
+  this.vboStrideNormals = 0; //this.vboFcount_a_Normal1  * this.FSIZE;
 
-	            //----------------------Attribute sizes
-  this.vboFcount_a_Position = 4;  // # of floats in the VBO needed to store the
-                                // attribute named a_Position (4: x,y,z,w values)
-  this.vboFcount_a_Color = 3;   // # of floats for this attrib (r,g,b values)
-  this.vboFcount_a_Normal = 3;  // # of floats for this attrib (i,j,k values)
 
-               //----------------------Attribute offsets
-	this.vboOffset_a_Position = 0;
-	                              //# of bytes from START of vbo to the START
-	                              // of 1st a_Position attrib value in vboContents[]
-  this.vboOffset_a_Color = (this.vboFcount_a_Position) * this.FSIZE;
-                                // == 4 floats * bytes/float
-                                //# of bytes from START of vbo to the START
-                                // of 1st a_Color attrib value in vboContents[]
-
-  this.vboOffset_a_Normal = (this.vboFcount_a_Position +
-                             this.vboFcount_a_Color) * this.FSIZE;
-                                // == 7 floats * bytes/float
-                                // # of bytes from START of vbo to the START
-                                // of 1st a_Normal attrib value in vboContents[]
+	 
+  //Attribute offsets
+  this.vboOffset_a_Pos1 = 0;
+  this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE * numVertices;
+  this.vboOffset_a_Normal1 = (this.vboFcount_a_Pos1 + this.vboFcount_a_Colr1) * this.FSIZE * numVertices;
 
 	            //-----------------------GPU memory locations:
 	this.vboLoc;									// GPU Location for Vertex Buffer Object,
@@ -958,9 +972,9 @@ function VBObox2() {
 	this.shaderLoc;								// GPU Location for compiled Shader-program
 	                            	// set by compile/link of VERT_SRC and FRAG_SRC.
 								          //------Attribute locations in our shaders:
-	this.a_PositionLoc;							// GPU location: shader 'a_Position' attribute
-	this.a_ColorLoc;								// GPU location: shader 'a_Color' attribute
-	this.a_NormalLoc;								// GPU location: shader 'a_Normal' attribute
+  this.a_Pos1Loc;
+  this.a_Colr1Loc;
+  this.a_Normal1Loc;
 
 	            //---------------------- Uniform locations &values in our shaders
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
@@ -1281,8 +1295,7 @@ function appendNormals(arr){
 }
 
 //concatenate two Float32Arrays
-function Float32Concat(first, second)
-{
+function Float32Concat(first, second){
   var firstLength = first.length,
   result = new Float32Array(firstLength + second.length);
 
@@ -1302,5 +1315,43 @@ function Float32Edit(base,edit,startIdx){
 
 //Concatenate all attributes into a single array
 function CreateVBO(){
-  return Float32Concat(positions,Float32Concat(float_colors,normals));
+
+  //-------Vertices---------
+          // X Y Z W | Position (4)
+          // R G B   | Color (3)
+          // I J K   | Normal (3)
+  pos = [];
+  colors = [];
+  norms = [];
+  
+  // Sphere
+  sphere = makeSphere2(1, 0, 0);
+  pos.push.apply(pos,sphere[0]);
+  colors.push.apply(colors,sphere[1]);
+  norms.push.apply(norms,sphere[2]);
+  
+  /* CYLINDER */
+  // Circle: {start: 0, len: (g_step * 2) + 2}
+  /*vertices.push(0, 0, 0, 1);
+  vertices.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+  }
+
+  // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
+    pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
+    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
+  } */
+
+
+  appendPositions(pos);
+  appendColors(colors);
+  appendNormals(norms);
+  vertexCount = pos.length;
+  //console.log(norms);
+  //console.log(colors);
 }
