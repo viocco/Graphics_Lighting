@@ -63,9 +63,9 @@ var floatsPerVertex = 10;
 
 function makeSphere2(r, g, b) {
   var slices = 12; // # of slices of the sphere along the z axis, including
-  // the south-pole and north pole end caps. ( >=2 req'd)
+  // the south-pole and north pole end caps. ( >=2 req'd) default: 12
   var sliceVerts = 21; // # of vertices around the top edge of the slice
-  // (same number of vertices on bottom of slice, too)
+  // (same number of vertices on bottom of slice, too) default: 21
   // (HINT: odd# or prime#s help avoid accidental symmetry)
   var topColr = new Float32Array([0.3, 0.3, 0.3]); // South Pole: dark-gray
   var botColr = new Float32Array([0.8, 0.8, 0.8]); // North Pole: light-gray.
@@ -74,7 +74,10 @@ function makeSphere2(r, g, b) {
   // 180 degree (Pi radian) lattitude angle between south pole and north pole.
 
   // Create a (global) array to hold this sphere's vertices:
-  var sphVerts = new Float32Array(((slices * 2 * sliceVerts) - 2) * floatsPerVertex); // modified to return local var
+  //var sphVerts = new Float32Array(((slices * 2 * sliceVerts) - 2) * floatsPerVertex); // modified to return local var
+    var sphVerts = [((slices * 2 * sliceVerts) - 2) * 4]; // modified to return local var
+    var sphColors = [((slices * 2 * sliceVerts) - 2) * 3]; // modified to return local var
+    var sphNorms = [((slices * 2 * sliceVerts) - 2) * 3]; // modified to return local var
   // # of vertices * # of elements needed to store them.
   // Each end-cap slice requires (2*sliceVerts -1) vertices
   // and each slice between them requires (2*sliceVerts).
@@ -88,8 +91,9 @@ function makeSphere2(r, g, b) {
   // for() loop's s var counts slices;
   // 				  its v var counts vertices;
   // 					its j var counts Float32Array elements
-  //					(vertices * elements per vertex)
+  //					(vertices * elements per vertex) 
   var j = 0; // initialize our array index
+  var k = 0;
   var isFirstSlice = 1; // ==1 ONLY while making south-pole slice; 0 otherwise
   var isLastSlice = 0; // ==1 ONLY while making north-pole slice; 0 otherwise
   for (s = 0; s < slices; s++) { // for each slice of the sphere,---------------------
@@ -118,7 +122,7 @@ function makeSphere2(r, g, b) {
     //		because its last vertex is on the BOTTOM (southwards) side of slice.
     //
     if (s == slices - 1) isLastSlice = 1; // (flag: skip last vertex of the last slice).
-    for (v = isFirstSlice; v < 2 * sliceVerts - isLastSlice; v++, j += floatsPerVertex) { // for each vertex of this slice,
+    for (v = isFirstSlice; v < 2 * sliceVerts - isLastSlice; v++, j += 4) { // for each vertex of this slice,
       if (v % 2 == 0) { // put vertices with even-numbered v at slice's bottom edge;
         // by circling CCW along longitude (east-west) angle 'theta':
         // (0 <= theta < 360deg, increases 'eastward' on sphere).
@@ -138,14 +142,17 @@ function makeSphere2(r, g, b) {
         sphVerts[j + 2] = sinTop; // z
         sphVerts[j + 3] = 1;
       }
-      sphVerts[j + 4] = r;
-      sphVerts[j + 5] = g;
-      sphVerts[j + 6] = b;
+      sphColors[j - k] = Math.random(); // r;
+      sphColors[j - k + 1] = Math.random(); // g;
+      sphColors[j - k + 2] = Math.random(); // b;
 
-      sphVerts[j + 7] = sphVerts[j];
-      sphVerts[j + 8] = sphVerts[j + 1];
-      sphVerts[j + 9] = sphVerts[j + 2];
+      sphNorms[j - k] = sphVerts[j];
+      sphNorms[j - k + 1] = sphVerts[j + 1];
+      sphNorms[j - k + 2] = sphVerts[j + 2];
+      k++;
     }
   }
-  return sphVerts;
+
+  sphmac = [sphVerts, sphColors, sphNorms];
+  return sphmac;
 }
