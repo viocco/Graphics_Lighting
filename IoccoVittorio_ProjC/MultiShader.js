@@ -22,7 +22,6 @@ var g_canvasID; // HTML-5 'canvas' element ID#
 var aspect;
 
 CreateVBO();
-
 // For multiple VBOs & Shaders:-----------------
 worldBox = new VBObox0(); // Holds VBO & shaders for 3D 'world' ground-plane grid, etc;
 part1Box = new VBObox1(); // "  "  for first set of custom-shaded 3D parts

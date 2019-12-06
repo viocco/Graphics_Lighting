@@ -111,6 +111,7 @@ var normalsDimensions = 3;
 var positions  = new Float32Array(numVertices*posDimensions);
 var float_colors = new Float32Array(numVertices*colorsDimensions);
 var normals = new Float32Array(numVertices*normalsDimensions);
+var g_step = 8.0; // [4, +inf]
 
 // Ground Plane
 function VBObox0() {
@@ -514,83 +515,8 @@ function VBObox1() {
 		gl_FragColor = vec4(v_Colr1, 1.0);
   }`;
 
-	// var pos = [];
-	// var g_step = 6;
-	//
-	// pos.push(0, 0, 0, 1);
-  // pos.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-	// pos.push(0, 0, 1);
-  // for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-  //   pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-  //   pos.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-	// 	pos.push(Math.cos(theta), Math.sin(theta), 0);
-  // }
-  // for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-  //   pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-	// 	pos.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-	// 	pos.push(Math.cos(theta), Math.sin(theta), 0);
-	//
-  //   pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
-  //   pos.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
-	// 	pos.push(Math.cos(theta), Math.sin(theta), 1);
-  // }
 
-  /*//-------Vertices---------
-          // X Y Z W | Position (4)
-          // R G B   | Color (3)
-          // I J K   | Normal (3)
-  pos = [];
-  colors = [];
-  norms = [];
-	
-  // Sphere
-	sphere = makeSphere2(1, 0, 0);
-  pos.push.apply(pos,sphere[0]);
-  colors.push.apply(colors,sphere[1]);
-  norms.push.apply(norms,sphere[2]);
-  
-  /* CYLINDER */
-  // Circle: {start: 0, len: (g_step * 2) + 2}
-  /*vertices.push(0, 0, 0, 1);
-  vertices.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-  }
-
-  // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
-  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
-    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
-  } 
-
-
-  appendPositions(pos);
-  appendColors(colors);
-  appendNormals(norms);
-  //console.log(norms);
-  //console.log(colors); */
   this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
-
-	// Tube
-	// new Float32Array(pos.length);
-	// for (var i = 0; i < pos.length; i++) {
-	// 	this.vboContents[i] = pos[i];
-	// }
-	// Triangle
-	// new Float32Array([
-	// 	0, 0, 1, 1,
-	// 	1, 0, 0,
-	// 	0, 0, 1,
-	// 	1, 0, 0, 1,
-	// 	1, 0, 0,
-	// 	0, 0, 1,
-	// 	1, 1, 1, 1,
-	// 	1, 0, 0,
-	// 	0, 0, 1
-	// ]);
   
   //--------------------- Attribute sizes
   this.vboFcount_a_Pos1 =  posDimensions;
@@ -787,7 +713,7 @@ VBObox1.prototype.adjust = function() {
 
 	this.ModelMatrix.setTranslate(0, 0, 0);
   this.ModelMatrix.scale(0.8, 0.8, 0.8);
-	this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
+	//this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 	gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, this.ModelMatrix.transpose().invert().elements);
@@ -802,10 +728,12 @@ VBObox1.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
-  this.ModelMatrix.translate(0, 0, 2);
+  //this.ModelMatrix.translate(0, 0, 2);
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  this.vboVerts = vertexCount;
+  draw();
+  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox1.prototype.reload = function() {
@@ -1251,7 +1179,8 @@ VBObox2.prototype.draw = function() {
   //  == specular exponent; (parseInt() converts from float to base-10 integer).
 
   // ----------------------------Draw the contents of the currently-bound VBO:
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  this.vboVerts = vertexCount;
+  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox2.prototype.reload = function() {
@@ -1312,6 +1241,10 @@ function Float32Edit(base,edit,startIdx){
   return base;
 }
 
+function lerp(a, b, l) {
+  return (a * l + (b * (1 - l)));
+}
+
 //Concatenate all attributes into a single array
 function CreateVBO(){
 
@@ -1319,37 +1252,7 @@ function CreateVBO(){
           // X Y Z W | Position (4)
           // R G B   | Color (3)
           // I J K   | Normal (3)
-  pos = [];
-  colors = [];
-  norms = [];
   
-  // Sphere
-  sphere = makeSphere2(1, 0, 0);
-  pos.push.apply(pos,sphere[0]);
-  colors.push.apply(colors,sphere[1]);
-  norms.push.apply(norms,sphere[2]);
-  
-  /* CYLINDER */
-  // Circle: {start: 0, len: (g_step * 2) + 2}
-  /*vertices.push(0, 0, 0, 1);
-  vertices.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-  }
-
-  // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
-  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-    pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
-    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0, 1);
-    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0, 1);
-  } */
-
-
-  appendPositions(pos);
-  appendColors(colors);
-  appendNormals(norms);
-  vertexCount = pos.length;
-  //console.log(colors);
+  vertexCount = initVBO() / 4;  //From IoccoVittorio_ProC.js
+  console.log(vertexCount);
 }

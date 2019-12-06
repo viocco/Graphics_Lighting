@@ -13,7 +13,7 @@
 var gl;
 
 // Canvas vars
-var g_canvas;
+var g_canvasID;
 var g_aspect = window.innerHeight / window.innerWidth;
 
 // Transformation vars
@@ -75,7 +75,7 @@ var tick = function() {
         sway(i);
       }
     }
-    requestAnimationFrame(tick, g_canvas);
+    requestAnimationFrame(tick, g_canvasID);
   }
 };
 
@@ -169,12 +169,12 @@ var help_visible = false;
  *
  * Initializes everything, then starts the main draw loop.
  */
-function main() {
+function main0() {
   /* Init vars */
   // Fix canvas size
-  g_canvas = document.getElementById('webgl');
-  g_canvas.width = window.innerWidth;
-  g_canvas.height = window.innerHeight;
+  g_canvasID = document.getElementById('webgl');
+  g_canvasID.width = window.innerWidth;
+  g_canvasID.height = window.innerHeight;
   gl = init();
   ModelMatrix = new Matrix4();
   updateModelMatrix(ModelMatrix);
@@ -327,7 +327,7 @@ function initVBO() {
 
   /* CYLINDER */
   // Circle: {start: 0, len: (g_step * 2) + 2}
-  pos.push(0, 0, 0, 1);
+  /*pos.push(0, 0, 0, 1);
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
   norms.push(0, 0, 0);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
@@ -335,7 +335,7 @@ function initVBO() {
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
-
+ 
   // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
@@ -344,11 +344,17 @@ function initVBO() {
     colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
-  }
+  } */
 
+
+  //console.log(normals);
+  //console.log(float_colors);
+  //console.log(positions)
+ 
+  //return pos.length; //From VBObox-Lib.js
   /* CONE */
   // Tip: {start: (g_step * 6) + 4, len: 1}
-  pos.push(0, 0, 1, 1);
+ /* pos.push(0, 0, 1, 1);
   colors.push(19.0/255.0, 120.0/255.0, 46.0/255.0, 1);
   norms.push(0, 0, 1);
   // Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
@@ -356,7 +362,7 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-  }
+  } 
 
   // Green Tube: {start: (g_step * 8) + 7, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
@@ -367,6 +373,7 @@ function initVBO() {
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
+*/
 
   /* Order of push:
      1. Top right wing (front/z+): 0-46
@@ -379,7 +386,7 @@ function initVBO() {
      8. Abdomen (circumference of cone): 241- 258 */
 
   // The top right wing
-  wing_start = pos.length / 4;
+  /*wing_start = pos.length / 4;
   pos.push( -1.0, 0.0, 0.0, 1.0,   // vertex 1
             -0.97,-0.076,0.0, 1.0, // vertex 2
             -0.97, 0.05, 0.0, 1.0, // vertex 3
@@ -510,10 +517,10 @@ function initVBO() {
   while (norms.length / 3 < pos.length / 4) {
     norms.push(0, 0, 1);
   }
-
+  */
    /* ABDOMEN */
 
-   // Circle: {start: 188, len: (g_step * 2) + 2}
+   /*// Circle: {start: 188, len: (g_step * 2) + 2}
    pos.push(0, 0, 0, 1);
    colors.push(.03, .13, .29);
    norms.push(0, 0, 0);
@@ -537,6 +544,8 @@ function initVBO() {
      colors.pop();
    }
 
+   */
+   /*
    // Cone Tip: {start: (g_step * 6) + 4, len: 1}
    pos.push(0, 1, 0, 1);
    colors.push(.03, .13, .29);
@@ -549,6 +558,7 @@ function initVBO() {
      norms.push(Math.cos(theta), 0, Math.sin(theta));
    }
 
+   
    // Head cube: {start: (g_step * 8) + 7, len: 9}
    pos.push( 0, 1, 1, 1,
              0, 0, 1, 1,
@@ -574,7 +584,8 @@ function initVBO() {
      norms.push(0, 0, 1);
      norms.push(0, 0, 1);
   }
-
+  */
+  /*
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
   var sphereVerts = makeSphere2(12, 21);
   sphereStart = (pos.length / 4) - 1;
@@ -589,10 +600,10 @@ function initVBO() {
   sphereLen2 = sphereVerts.length / 7;
   pos.push.apply(pos, sphereVerts[0]);
   colors.push.apply(colors, sphereVerts[1]);
-  norms.push.apply(norms, sphereVerts[2]);
+  norms.push.apply(norms, sphereVerts[2]); */
 
   // Lilypad Circle: {start: 1384 + gndverts.length, len: (8.5 * 2) + 2}
-  pos.push(0, 0, 0, 1);
+ /* pos.push(0, 0, 0, 1);
   lilyStart = 1384;
   lilyLen = (8.5*2)+3;
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
@@ -601,11 +612,11 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(20/255, (theta+110)/255.0, 10/255);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-  }
+  } */
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
   //console.log(pos.g);
-  pos.push(.3,1,.7,1);
+ /* pos.push(.3,1,.7,1);
   pos.push(-.3,1,.7,1);
   pos.push(0,0,0,1);
   pos.push(.3,1,.4,1);
@@ -624,7 +635,7 @@ function initVBO() {
   norms.push(0,0,0);
   norms.push(.3,1,.4);
   norms.push(-.3,1,.4);
-  norms.push(0,0,0);
+  norms.push(0,0,0); 
 
   // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;
@@ -634,7 +645,8 @@ function initVBO() {
   pos.push.apply(pos, sphereVerts[0]);
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
-
+  */
+/*
   // Fallen log
   var logStep = g_step * 2;
   logStart = pos.length / 4;
@@ -670,7 +682,7 @@ function initVBO() {
     norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
   logEnd = pos.length / 4;
-
+*/
   // Rocks
   rockStart = pos.length / 4;
   pos.push(
@@ -754,8 +766,10 @@ function initVBO() {
     }
   }
 
-  appendPositions(pos);
-  appendColors(colors);
+  appendPositions(pos); //From VBObox-Lib.js
+  appendColors(colors); //From VBObox-Lib.js
+  appendNormals(norms); //From VBObox-Lib.js
+  return pos.length; //From VBObox-Lib.js
 }
 
 function lerp(a, b, l) {
@@ -763,9 +777,9 @@ function lerp(a, b, l) {
 }
 
 function drawResize() {
-  gl = getWebGLContext(g_canvas);
-  g_canvas.width = window.innerWidth;
-  g_canvas.height = window.innerHeight;
+  gl = getWebGLContext(g_canvasID);
+  g_canvasID.width = window.innerWidth;
+  g_canvasID.height = window.innerHeight;
 }
 
 /*
@@ -777,8 +791,8 @@ function draw() {
   // Left VP
   pushMatrix(ModelMatrix);
 
-  gl.viewport(0, 0, g_canvas.width / 2, g_canvas.height);
-	var vpAspect = (g_canvas.width / 2) / g_canvas.height;
+  gl.viewport(0, 0, g_canvasID.width / 2, g_canvasID.height);
+	var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
   ModelMatrix.setPerspective(40 * vpAspect, vpAspect, 1, 100);
   if (onDragonfly) {
     var lookvector = [
@@ -833,8 +847,8 @@ function draw() {
   // Right VP
   pushMatrix(ModelMatrix);
 
-  gl.viewport(g_canvas.width / 2, 0, g_canvas.width / 2, g_canvas.height);
-	var vpAspect = (g_canvas.width / 2) / g_canvas.height;
+  gl.viewport(g_canvasID.width / 2, 0, g_canvasID.width / 2, g_canvasID.height);
+	var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
   ModelMatrix.setOrtho(
     -33/2 * vpAspect, // left
      33/2 * vpAspect, // right
@@ -1512,10 +1526,10 @@ function myMouseDown(ev) {
     return;
   var rect = ev.target.getBoundingClientRect();
   var xp = ev.clientX - rect.left;
-  var yp = g_canvas.height - (ev.clientY - rect.top);
+  var yp = g_canvasID.height - (ev.clientY - rect.top);
 
-  var x = (xp - g_canvas.width/2)  / (g_canvas.width/2);
-	var y = (yp - g_canvas.height/2) / (g_canvas.height/2);
+  var x = (xp - g_canvasID.width/2)  / (g_canvasID.width/2);
+	var y = (yp - g_canvasID.height/2) / (g_canvasID.height/2);
 
 	g_isDrag = true;
 	g_xMclik = x;
@@ -1532,10 +1546,10 @@ function myMouseMove(ev) {
 
   var rect = ev.target.getBoundingClientRect();
   var xp = ev.clientX - rect.left;
-  var yp = g_canvas.height - (ev.clientY - rect.top);
+  var yp = g_canvasID.height - (ev.clientY - rect.top);
 
-  var x = (xp - g_canvas.width/2)  / (g_canvas.width/2);
-  var y = (yp - g_canvas.height/2) / (g_canvas.height/2);
+  var x = (xp - g_canvasID.width/2)  / (g_canvasID.width/2);
+  var y = (yp - g_canvasID.height/2) / (g_canvasID.height/2);
 
   g_xMdragTot += (x - g_xMclik);
   g_yMdragTot += (y - g_yMclik);
@@ -1549,10 +1563,10 @@ function myMouseUp(ev) {
     return;
   var rect = ev.target.getBoundingClientRect();
   var xp = ev.clientX - rect.left;
-	var yp = g_canvas.height - (ev.clientY - rect.top);
+	var yp = g_canvasID.height - (ev.clientY - rect.top);
 
-  var x = (xp - g_canvas.width/2)  / (g_canvas.width/2);
-	var y = (yp - g_canvas.height/2) / (g_canvas.height/2);
+  var x = (xp - g_canvasID.width/2)  / (g_canvasID.width/2);
+	var y = (yp - g_canvasID.height/2) / (g_canvasID.height/2);
 
 	g_isDrag = false;
 	g_xMdragTot += (x - g_xMclik);
