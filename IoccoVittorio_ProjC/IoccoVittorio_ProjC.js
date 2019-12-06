@@ -93,77 +93,6 @@ var g_dragonfly_x = 0;
 var g_dragonfly_y = 0;
 var g_dragonfly_z = 0;
 
-// GUI vars
-var gui;
-var gui_open = false;
-var GuiTracker = function() {
-  this.global_x_pos = 0;
-  this.global_y_pos = 0;
-  this.global_z_pos = 0;
-  this.global_x_scale = 1;
-  this.global_y_scale = 1;
-  this.global_z_scale = 1;
-  this.global_x_rot = 0;
-  this.global_y_rot = 0;
-  this.global_z_rot = 0;
-  this.animate_toggle = true;
-  this.cattail_sway = true;
-  this.addDragonfly = function() {
-    tracker.animate_toggle = false;
-    setTimeout(function(){
-      dragonfly_count++;
-      addDragonfly();
-      tracker.animate_toggle = true;
-      g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-      tick();
-    }, 10);
-  };
-  this.addCattail = function() {
-    tracker.animate_toggle = false;
-    setTimeout(function(){
-      cattail_count++;
-      addCattail();
-      tracker.animate_toggle = true;
-      g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-      tick();
-    }, 10);
-  };
-  this.removeDragonfly = function() {
-    tracker.animate_toggle = false;
-    setTimeout(function(){
-      dragonfly_count--;
-      removeDragonfly();
-      tracker.animate_toggle = true;
-      g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-      tick();
-    }, 10);
-  };
-  this.removeCattail = function() {
-    tracker.animate_toggle = false;
-    setTimeout(function(){
-      cattail_count--;
-      removeCattail();
-      tracker.animate_toggle = true;
-      g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-      tick();
-    }, 10);
-  };
-  this.reset = function() {
-    this.global_x_pos = this.global_y_pos = this.global_z_pos = 0;
-    this.global_x_rot = this.global_y_rot = this.global_z_rot = 0;
-    this.global_x_scale = this.global_y_scale = this.global_z_scale = 1;
-    g_xMdragTot = 0.0;
-    g_yMdragTot = 0.0;
-    draw();
-  };
-}
-var tracker = new GuiTracker();
-var help_visible = false;
-
 /**
  * Main function.
  *
@@ -269,52 +198,6 @@ function removeCattail() {
 }
 
 /*
- * Initializes the GUI at startup, registers variable state listeners.
- */
-function initGui() {
-  gui = new dat.GUI({name: 'My GUI'});
-  var anim = gui.addFolder('Animations');
-  var controller = anim.add(tracker, 'animate_toggle').listen();
-  controller.onChange(function(value) {
-    if (value) {
-      g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-      tick();
-    }
-  });
-  var controller2 = anim.add(tracker, 'cattail_sway');
-  controller2.onChange(function(value) {
-    if (value) {
-      g_cattail_last = Date.now();
-    }
-  });
-  anim.open();
-  var position = gui.addFolder('Position');
-  position.add(tracker, 'global_x_pos', -2, 2).listen();
-  position.add(tracker, 'global_y_pos', -2, 2).listen();
-  position.add(tracker, 'global_z_pos', -2, 2).listen();
-  // position.open();
-  var scale = gui.addFolder('Scale');
-  scale.add(tracker, 'global_x_scale', 0.1, 4);
-  scale.add(tracker, 'global_y_scale', 0.1, 4);
-  scale.add(tracker, 'global_z_scale', 0.1, 4);
-  // scale.open();
-  var rotate = gui.addFolder('Rotation');
-  rotate.add(tracker, 'global_x_rot', -360, 360).listen();
-  rotate.add(tracker, 'global_y_rot', -360, 360).listen();
-  rotate.add(tracker, 'global_z_rot', -360, 360).listen();
-  // rotate.open();
-  var manage_objects = gui.addFolder('Manage Objects');
-  manage_objects.add(tracker, 'addDragonfly');
-  manage_objects.add(tracker, 'removeDragonfly');
-  manage_objects.add(tracker, 'addCattail');
-  manage_objects.add(tracker, 'removeCattail');
-  manage_objects.open();
-  gui.add(tracker, 'reset');
-  gui.close();
-}
-
-/*
  * Fills VBO with all of the data we will need.
  *
  * This function runs once on startup, and loads all of the necessary vertices
@@ -335,7 +218,7 @@ function initVBO() {
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
- 
+
   // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
@@ -350,7 +233,7 @@ function initVBO() {
   //console.log(normals);
   //console.log(float_colors);
   //console.log(positions)
- 
+
   //return pos.length; //From VBObox-Lib.js
   /* CONE */
   // Tip: {start: (g_step * 6) + 4, len: 1}
@@ -362,7 +245,7 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-  } 
+  }
 
   // Green Tube: {start: (g_step * 8) + 7, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
@@ -558,7 +441,7 @@ function initVBO() {
      norms.push(Math.cos(theta), 0, Math.sin(theta));
    }
 
-   
+
    // Head cube: {start: (g_step * 8) + 7, len: 9}
    pos.push( 0, 1, 1, 1,
              0, 0, 1, 1,
@@ -635,7 +518,7 @@ function initVBO() {
   norms.push(0,0,0);
   norms.push(.3,1,.4);
   norms.push(-.3,1,.4);
-  norms.push(0,0,0); 
+  norms.push(0,0,0);
 
   // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;

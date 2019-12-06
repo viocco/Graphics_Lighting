@@ -517,15 +517,15 @@ function VBObox1() {
 
 
   this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
-  
+
   //--------------------- Attribute sizes
   this.vboFcount_a_Pos1 =  posDimensions;
   this.vboFcount_a_Colr1 = colorsDimensions;
   this.vboFcount_a_Normal1 = normalsDimensions;
 
-  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), 
+  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3),
   //           "Number of vertices across positions, colors, and normals vectors not equal");
-  
+
 	this.vboVerts = vertexCount / 4;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
   this.vboBytes = this.vboContents.length * this.FSIZE;
@@ -732,8 +732,8 @@ VBObox1.prototype.draw = function() {
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   this.vboVerts = vertexCount;
-  draw();
-  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  // draw();
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox1.prototype.reload = function() {
@@ -750,7 +750,7 @@ VBObox1.prototype.reload = function() {
 
 // Phong Shading
 function VBObox2() {
-  
+
 	this.VERT_SRC =	`
   precision highp float;
 
@@ -851,14 +851,14 @@ function VBObox2() {
   //pos = [];
   //colors = [];
   //norms = [];
-  
+
   // Sphere
   //sphere = makeSphere2(1, 0, 0);
   //pos.push.apply(pos,sphere[0]);
   //colors.push.apply(colors,sphere[1]);
   //norms.push.apply(norms,sphere[2]);
 
-  //appendPositions(pos); 
+  //appendPositions(pos);
   //appendColors(colors);
   //appendNormals(norms);
 
@@ -869,9 +869,9 @@ function VBObox2() {
   this.vboFcount_a_Colr1 = colorsDimensions;
   this.vboFcount_a_Normal1 = normalsDimensions;
 
-  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3), 
+  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3),
   //            "Number of vertices across positions, colors, and normals vectors not equal");
-  
+
   this.vboVerts = vertexCount / 4;
 	this.FSIZE = this.vboContents.BYTES_PER_ELEMENT;
 	                              // bytes req'd by 1 vboContents array element;
@@ -880,14 +880,14 @@ function VBObox2() {
   this.vboBytes = this.vboContents.length * this.FSIZE;
                                 // (#  of floats in vboContents array) *
                                 // (# of bytes/float).
-	
+
   //Attribute Strides
   this.vboStrideColors =  0; //this.vboFcount_a_Colr1 * this.FSIZE;
   this.vboStridePositions = 0; //this.vboFcount_a_Pos1 * this.FSIZE;
   this.vboStrideNormals = 0; //this.vboFcount_a_Normal1  * this.FSIZE;
 
 
-	 
+
   //Attribute offsets
   this.vboOffset_a_Pos1 = 0;
   this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE * numVertices;
@@ -1180,7 +1180,7 @@ VBObox2.prototype.draw = function() {
 
   // ----------------------------Draw the contents of the currently-bound VBO:
   this.vboVerts = vertexCount;
-  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox2.prototype.reload = function() {
@@ -1252,7 +1252,7 @@ function CreateVBO(){
           // X Y Z W | Position (4)
           // R G B   | Color (3)
           // I J K   | Normal (3)
-  
+
   vertexCount = initVBO() / 4;  //From IoccoVittorio_ProC.js
   console.log(vertexCount);
 }

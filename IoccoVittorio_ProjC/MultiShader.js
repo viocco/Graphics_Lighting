@@ -56,11 +56,6 @@ var g_posMax1 = 1.0; // max, min allowed positions
 var g_posMin1 = -1.0;
 //---------------
 
-// For mouse/keyboard:------------------------
-var g_show0 = 1; // 0==Show, 1==Hide VBO0 contents on-screen.
-var g_show1 = 1; // 	"					"			VBO1		"				"				"
-var g_show2 = 1; //  "         "     VBO2    "       "       "
-
 // Camera vars
 var g_perspective_eye = [15, 0, 0]; // where the camera is
 var g_perspective_lookat = [14, 0, 0]; // where the camera is pointing
@@ -165,39 +160,20 @@ function drawAll() {
   var b4Draw = Date.now();
   var b4Wait = b4Draw - g_lastMS;
 
-  if (g_show0 == 1) {
-    worldBox.switchToMe();
-    worldBox.adjust();
-    worldBox.draw();
-  }
-  if (g_show1 == 1) {
+  // Always draw VBOBox0
+  worldBox.switchToMe();
+  worldBox.adjust();
+  worldBox.draw();
+  if (tracker.gouraud) {
     part1Box.switchToMe();
     part1Box.adjust();
     part1Box.draw();
   }
-  if (g_show2 == 1) {
+  else if (tracker.phong) {
     part2Box.switchToMe();
     part2Box.adjust();
     part2Box.draw();
   }
-}
-
-function VBO0toggle() {
-  if (g_show0 != 1) g_show0 = 1; // show
-  else g_show0 = 0; // hide
-  console.log('g_show0: ' + g_show0);
-}
-
-function VBO1toggle() {
-  if (g_show1 != 1) g_show1 = 1; // show
-  else g_show1 = 0; // hide
-  console.log('g_show1: ' + g_show1);
-}
-
-function VBO2toggle() {
-  if (g_show2 != 1) g_show2 = 1; // show
-  else g_show2 = 0; // hide
-  console.log('g_show2: ' + g_show2);
 }
 
 function myKeyDown(kev) {
