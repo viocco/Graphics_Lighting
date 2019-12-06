@@ -453,11 +453,13 @@ function VBObox1() {
 	this.VERT_SRC = `
 	// Required
 	precision highp float;
+	precision mediump int;
 
 	// Uniforms
 	uniform mat4 u_ProjectionMatrix;
   uniform mat4 u_ModelMatrix;
 	uniform mat4 u_NormalMatrix;
+	uniform int u_useBlinnPhong;
 
 	// Attributes
 	attribute vec4 a_Pos1;
@@ -492,10 +494,17 @@ function VBObox1() {
 		float lambertian = max(dot(N, L), 0.0);
 		float specular = 0.0;
 		if (lambertian > 0.0) {
-			vec3 R = reflect(-L, N);
-			vec3 V = normalize(-v_VertPos);
-			float specAngle = max(dot(R, V), 0.0);
-			specular = pow(specAngle, shininess);
+			if (u_useBlinnPhong == 1) {
+				vec3 V = normalize(-v_VertPos);
+				vec3 H = (L + V) / length(L + V);
+				float specAngle = max(dot(N, H), 0.0);
+				specular = pow(specAngle, shininess);
+			} else {
+				vec3 R = reflect(-L, N);
+				vec3 V = normalize(-v_VertPos);
+				float specAngle = max(dot(R, V), 0.0);
+				specular = pow(specAngle, shininess);
+			}
 		}
 
   	v_Colr1 = vec3(Ka * a_Colr1 * 0.15 +
@@ -558,6 +567,7 @@ function VBObox1() {
 	this.ProjectionMatrix = new Matrix4();
 	this.u_ProjectionMatrixLoc;
 	this.u_NormalMatrixLoc;
+	this.u_useBlinnPhongLoc;
 };
 
 VBObox1.prototype.init = function() {
@@ -614,6 +624,15 @@ VBObox1.prototype.init = function() {
   if (!this.u_NormalMatrixLoc) {
     console.log(this.constructor.name +
      						'.init() failed to get GPU location for u_NormalMatrix uniform');
+    return;
+  }
+
+
+	// Blinn-Phong switch
+	this.u_useBlinnPhongLoc = gl.getUniformLocation(gl.program, 'u_useBlinnPhong');
+	if (!this.u_useBlinnPhongLoc) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_useBlinnPhong uniform');
     return;
   }
 }
@@ -717,6 +736,8 @@ VBObox1.prototype.adjust = function() {
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 	gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, this.ModelMatrix.transpose().invert().elements);
+
+	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
 }
 
 VBObox1.prototype.draw = function() {
