@@ -732,7 +732,6 @@ VBObox1.prototype.draw = function() {
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   this.vboVerts = vertexCount;
-  // draw();
   gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
