@@ -814,6 +814,7 @@ function VBObox2() {
   uniform LampT u_LampSet[1]; // Array of all light sources
   uniform MatlT u_MatlSet[1]; // Array of all materials
   uniform vec3 u_eyePosWorld; // Camera/eye location in world coords
+	uniform int u_useBlinnPhong; // Toggel Phong/Blinn-Phong lighting
 
   // VARYING
   varying vec3 v_Normal;   // Find 3D surface normal at each pix
@@ -827,10 +828,17 @@ function VBObox2() {
 		float lambertian = max(dot(normal, lightDirection), 0.0);
 		float specular = 0.0;
 		if (lambertian > 0.0) {
-			vec3 R = reflect(-lightDirection, normal);
-			vec3 V = normalize(-v_Position);
-			float specAngle = max(dot(R, V), 0.0);
-			specular = pow(specAngle, float(u_MatlSet[0].shiny));
+			if (u_useBlinnPhong == 1) {
+				vec3 V = normalize(-v_Position);
+				vec3 H = (lightDirection + V) / length(lightDirection + V);
+				float specAngle = max(dot(normal, H), 0.0);
+				specular = pow(specAngle, float(u_MatlSet[0].shiny));
+			} else {
+				vec3 R = reflect(-lightDirection, normal);
+				vec3 V = normalize(-v_Position);
+				float specAngle = max(dot(R, V), 0.0);
+				specular = pow(specAngle, float(u_MatlSet[0].shiny));
+			}
 		}
 
 		gl_FragColor = vec4(
@@ -913,6 +921,7 @@ function VBObox2() {
   this.u_MvpMatrixLoc;
   this.NormalMatrix = new Matrix4(); //Transformation matrix for normals
   this.u_NormalMatrixLoc;
+	this.u_useBlinnPhongLoc;
 
   this.lamp0 = new LightsT();
   this.matlSel = MATL_GOLD_SHINY;
@@ -1027,6 +1036,14 @@ VBObox2.prototype.init = function() {
   // Position the camera in world coordinates:
   this.eyePosWorld.set([6.0, 0.0, 0.0]);
   gl.uniform3fv(this.uLoc_eyePosWorld, this.eyePosWorld);
+
+	// Blinn-Phong switch
+	this.u_useBlinnPhongLoc = gl.getUniformLocation(gl.program, 'u_useBlinnPhong');
+	if (!this.u_useBlinnPhongLoc) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_useBlinnPhong uniform');
+    return;
+  }
 
   // Init World-coord. position & colors of first light source in global vars;
   this.lamp0.I_pos.elements.set([1.0, 1.0, 1.0]);
@@ -1150,6 +1167,7 @@ VBObox2.prototype.adjust = function() {
   gl.uniformMatrix4fv(this.uLoc_MvpMatrix, false, this.MvpMatrix.elements);
   gl.uniformMatrix4fv(this.uLoc_NormalMatrix, false, this.NormalMatrix.elements);
 
+	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
   this.reload();
 }
 
