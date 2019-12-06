@@ -98,37 +98,37 @@ var g_dragonfly_z = 0;
  *
  * Initializes everything, then starts the main draw loop.
  */
-function main0() {
+function main1() {
   /* Init vars */
   // Fix canvas size
-  g_canvasID = document.getElementById('webgl');
-  g_canvasID.width = window.innerWidth;
-  g_canvasID.height = window.innerHeight;
-  gl = init();
-  ModelMatrix = new Matrix4();
-  updateModelMatrix(ModelMatrix);
-  gl.clearColor(0.5, 0.7, 1, 1.0);
-  gl.enable(gl.DEPTH_TEST);
+  //g_canvasID = document.getElementById('webgl');
+  //g_canvasID.width = window.innerWidth;
+  //g_canvasID.height = window.innerHeight;
+  //gl = init();
+  //ModelMatrix = new Matrix4();
+  //updateModelMatrix(ModelMatrix);
+  //gl.clearColor(0.5, 0.7, 1, 1.0);
+  //gl.enable(gl.DEPTH_TEST);
 
   /* Init Functions */
-  initGui();
-  initVBO();
+  //initGui();
+  //initVBO();
 
   /* Init event listeners */
-	window.addEventListener("keydown", myKeyDown, false);
-  window.addEventListener("mousedown", myMouseDown);
-  window.addEventListener("mousemove", myMouseMove);
-	window.addEventListener("mouseup", myMouseUp);
-  (function() {
-      document.onmousemove = handleMouseMove;
-      function handleMouseMove(event) {
-          var eventDoc, doc, body;
-          // IE compat
-          event=event||window.event;if(event.pageX==null&&event.clientX!=null){eventDoc=(event.target&&event.target.ownerDocument)||document;doc=eventDoc.documentElement;body=eventDoc.body;event.pageX=event.clientX+(doc&&doc.scrollLeft||body&&body.scrollLeft||0)-(doc&&doc.clientLeft||body&&body.clientLeft||0);event.pageY=event.clientY+(doc&&doc.scrollTop||body&&body.scrollTop||0)-(doc&&doc.clientTop||body&&body.clientTop||0);}
-          g_mouse_x = event.pageX / (window.innerWidth * g_aspect);
-          g_mouse_y = event.pageY / window.innerHeight;
-      }
-  })(); // mousemove
+	//window.addEventListener("keydown", myKeyDown, false);
+  //window.addEventListener("mousedown", myMouseDown);
+  //window.addEventListener("mousemove", myMouseMove);
+	// window.addEventListener("mouseup", myMouseUp);
+  // (function() {
+  //     document.onmousemove = handleMouseMove;
+  //     function handleMouseMove(event) {
+  //         var eventDoc, doc, body;
+  //         // IE compat
+  //         event=event||window.event;if(event.pageX==null&&event.clientX!=null){eventDoc=(event.target&&event.target.ownerDocument)||document;doc=eventDoc.documentElement;body=eventDoc.body;event.pageX=event.clientX+(doc&&doc.scrollLeft||body&&body.scrollLeft||0)-(doc&&doc.clientLeft||body&&body.clientLeft||0);event.pageY=event.clientY+(doc&&doc.scrollTop||body&&body.scrollTop||0)-(doc&&doc.clientTop||body&&body.clientTop||0);}
+  //         g_mouse_x = event.pageX / (window.innerWidth * g_aspect);
+  //         g_mouse_y = event.pageY / window.innerHeight;
+  //     }
+  //})(); // mousemove
 
   /* Randomize forest */
   for (var i = 0; i < cattail_count; i++) {
@@ -158,7 +158,7 @@ function main0() {
   }
 
   /* Start main draw loop */
-  tick();
+  //tick();
 }
 
 function addDragonfly() {
@@ -177,6 +177,8 @@ function addDragonfly() {
     0,                              // head vector z
   ]);
 }
+
+main1();
 
 function removeDragonfly() {
   g_dragonflies.pop();
@@ -210,7 +212,7 @@ function initVBO() {
 
   /* CYLINDER */
   // Circle: {start: 0, len: (g_step * 2) + 2}
-  /*pos.push(0, 0, 0, 1);
+  pos.push(0, 0, 0, 1);
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
   norms.push(0, 0, 0);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
@@ -227,7 +229,7 @@ function initVBO() {
     colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
-  } */
+  } 
 
 
   //console.log(normals);
@@ -237,7 +239,7 @@ function initVBO() {
   //return pos.length; //From VBObox-Lib.js
   /* CONE */
   // Tip: {start: (g_step * 6) + 4, len: 1}
- /* pos.push(0, 0, 1, 1);
+  pos.push(0, 0, 1, 1);
   colors.push(19.0/255.0, 120.0/255.0, 46.0/255.0, 1);
   norms.push(0, 0, 1);
   // Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
@@ -256,7 +258,7 @@ function initVBO() {
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
-*/
+
 
   /* Order of push:
      1. Top right wing (front/z+): 0-46
@@ -269,7 +271,7 @@ function initVBO() {
      8. Abdomen (circumference of cone): 241- 258 */
 
   // The top right wing
-  /*wing_start = pos.length / 4;
+  wing_start = pos.length / 4;
   pos.push( -1.0, 0.0, 0.0, 1.0,   // vertex 1
             -0.97,-0.076,0.0, 1.0, // vertex 2
             -0.97, 0.05, 0.0, 1.0, // vertex 3
@@ -400,10 +402,10 @@ function initVBO() {
   while (norms.length / 3 < pos.length / 4) {
     norms.push(0, 0, 1);
   }
-  */
+  
    /* ABDOMEN */
 
-   /*// Circle: {start: 188, len: (g_step * 2) + 2}
+   // Circle: {start: 188, len: (g_step * 2) + 2}
    pos.push(0, 0, 0, 1);
    colors.push(.03, .13, .29);
    norms.push(0, 0, 0);
@@ -427,8 +429,8 @@ function initVBO() {
      colors.pop();
    }
 
-   */
-   /*
+   
+   
    // Cone Tip: {start: (g_step * 6) + 4, len: 1}
    pos.push(0, 1, 0, 1);
    colors.push(.03, .13, .29);
@@ -467,8 +469,8 @@ function initVBO() {
      norms.push(0, 0, 1);
      norms.push(0, 0, 1);
   }
-  */
-  /*
+  
+  
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
   var sphereVerts = makeSphere2(12, 21);
   sphereStart = (pos.length / 4) - 1;
@@ -483,10 +485,10 @@ function initVBO() {
   sphereLen2 = sphereVerts.length / 7;
   pos.push.apply(pos, sphereVerts[0]);
   colors.push.apply(colors, sphereVerts[1]);
-  norms.push.apply(norms, sphereVerts[2]); */
+  norms.push.apply(norms, sphereVerts[2]); 
 
   // Lilypad Circle: {start: 1384 + gndverts.length, len: (8.5 * 2) + 2}
- /* pos.push(0, 0, 0, 1);
+  pos.push(0, 0, 0, 1);
   lilyStart = 1384;
   lilyLen = (8.5*2)+3;
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
@@ -495,11 +497,11 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(20/255, (theta+110)/255.0, 10/255);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-  } */
+  } 
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
   //console.log(pos.g);
- /* pos.push(.3,1,.7,1);
+  pos.push(.3,1,.7,1);
   pos.push(-.3,1,.7,1);
   pos.push(0,0,0,1);
   pos.push(.3,1,.4,1);
@@ -528,8 +530,7 @@ function initVBO() {
   pos.push.apply(pos, sphereVerts[0]);
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
-  */
-/*
+  
   // Fallen log
   var logStep = g_step * 2;
   logStart = pos.length / 4;
@@ -565,7 +566,7 @@ function initVBO() {
     norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
   logEnd = pos.length / 4;
-*/
+
   // Rocks
   rockStart = pos.length / 4;
   pos.push(
@@ -669,34 +670,22 @@ function drawResize() {
  * Main draw handler, sets up global matrix and calls other draw functions.
  */
 function draw() {
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+  //l.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   // Left VP
   pushMatrix(ModelMatrix);
 
-  gl.viewport(0, 0, g_canvasID.width / 2, g_canvasID.height);
+  //gl.viewport(0, 0, g_canvasID.width / 2, g_canvasID.height);
 	var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
-  ModelMatrix.setPerspective(40 * vpAspect, vpAspect, 1, 100);
-  if (onDragonfly) {
-    var lookvector = [
-      g_dragonflies[0][4] - g_dragonflies[0][0],
-      g_dragonflies[0][5] - g_dragonflies[0][1],
-      g_dragonflies[0][8] - g_dragonflies[0][7],
-    ];
-    ModelMatrix.lookAt(
-      g_dragonflies[0][0], g_dragonflies[0][1], g_dragonflies[0][7],
-      lookvector[0] / 2, lookvector[1] / 2, lookvector[2] / 2,
-      g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
-    );
-  } else {
-    ModelMatrix.lookAt(
-      g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
-      g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
-      g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
-    );
-  }
-
-  ModelMatrix.scale(1 / vpAspect, 1, 1);
+  // ModelMatrix.setPerspective(40 * vpAspect, vpAspect, 1, 100);
+  // ModelMatrix.lookAt(
+  //   g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
+  //   g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
+  //   g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
+  // );
+  ModelMatrix.setTranslate(0, 0, 0);
+  //ModelMatrix.scale(1 / vpAspect, 1, 1);
   ModelMatrix.translate(tracker.global_x_pos, tracker.global_y_pos, tracker.global_z_pos);
   ModelMatrix.rotate(tracker.global_x_rot, 1, 0, 0);
   ModelMatrix.rotate(tracker.global_y_rot + g_angle, 0, 1, 0);
@@ -704,10 +693,10 @@ function draw() {
   ModelMatrix.scale(tracker.global_x_scale, tracker.global_y_scale, tracker.global_z_scale);
 
   //draw world Axes
-  drawAxes();
+  //drawAxes();
 
   //drawGround
-  drawGroundGrid();
+  //drawGroundGrid();
 
   //drawLilyPad
   drawLilyPad();
@@ -727,68 +716,7 @@ function draw() {
 
   ModelMatrix = popMatrix();
 
-  // Right VP
-  pushMatrix(ModelMatrix);
-
-  gl.viewport(g_canvasID.width / 2, 0, g_canvasID.width / 2, g_canvasID.height);
-	var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
-  ModelMatrix.setOrtho(
-    -33/2 * vpAspect, // left
-     33/2 * vpAspect, // right
-    -33/2, // bottom
-     33/2, // top
-        1, // near
-      100  // far
-  );
-  if (onDragonfly) {
-    var lookvector = [
-      g_dragonflies[0][4] - g_dragonflies[0][0],
-      g_dragonflies[0][5] - g_dragonflies[0][1],
-      g_dragonflies[0][8] - g_dragonflies[0][7],
-    ];
-    ModelMatrix.lookAt(
-      g_dragonflies[0][0], g_dragonflies[0][1], g_dragonflies[0][7],
-      lookvector[0], lookvector[1], lookvector[2],
-      g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
-    );
-  } else {
-    ModelMatrix.lookAt(
-      g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
-      g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
-      g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
-    );
-  }
-
-  ModelMatrix.scale(1 / vpAspect, 1, 1);
-  ModelMatrix.translate(tracker.global_x_pos, tracker.global_y_pos, tracker.global_z_pos);
-  ModelMatrix.rotate(tracker.global_x_rot, 1, 0, 0);
-  ModelMatrix.rotate(tracker.global_y_rot + g_angle, 0, 1, 0);
-  ModelMatrix.rotate(tracker.global_z_rot, 0, 0, 1);
-  ModelMatrix.scale(tracker.global_x_scale, tracker.global_y_scale, tracker.global_z_scale);
-
-  //draw world Axes
-  drawAxes();
-
-  drawGroundGrid();
-
-  //drawLilyPad
-  drawLilyPad();
-
-  for (var i = 0; i < rock_count; i++) {
-    drawRocks(g_rocks[i][0], g_rocks[i][1], g_rocks[i][2], g_rocks[i][3]);
-  }
-  for (var i = 0; i < log_count; i++) {
-    drawLogs(g_logs[i][0], g_logs[i][1], g_logs[i][2], g_logs[i][3]);
-  }
-  for (var i = 0; i < dragonfly_count; i++) {
-    drawDragonfly(i);
-  }
-  for (var i = 0; i < cattail_count; i++) {
-    drawCattail(g_cattails[i][0], g_cattails[i][1], g_cattails[i][2], g_cattails[i][3]);
-  }
-
-  ModelMatrix = popMatrix();
-}
+}     
 
 /*
  * Draws a cattail at a given position.

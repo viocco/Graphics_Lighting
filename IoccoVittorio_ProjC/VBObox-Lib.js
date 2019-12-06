@@ -426,6 +426,7 @@ VBObox0.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
+
   // ----------------------------Draw the contents of the currently-bound VBO:
   gl.drawArrays(gl.LINES, 	    // select the drawing primitive to draw,
                   // choices: gl.POINTS, gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP,
@@ -729,11 +730,11 @@ VBObox1.prototype.adjust = function() {
     g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
     g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
   );
-
-	this.ModelMatrix.setTranslate(0, 0, 0);
-  this.ModelMatrix.scale(0.8, 0.8, 0.8);
+	//this.ModelMatrix.setTranslate(0, 0, 0);
+  //this.ModelMatrix.scale(0.8, 0.8, 0.8);
 	//this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
+  ModelMatrix = this.ModelMatrix;
+  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, ModelMatrix.elements);
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 	gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, this.ModelMatrix.transpose().invert().elements);
 
@@ -749,11 +750,12 @@ VBObox1.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
-  //this.ModelMatrix.translate(0, 0, 2);
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
-  // ----------------------------Draw the contents of the currently-bound VBO:
   this.vboVerts = vertexCount;
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  //this.ModelMatrix.translate(0, 0, 2);
+  //gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
+  // ----------------------------Draw the contents of the currently-bound VBO:
+  draw();
+  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox1.prototype.reload = function() {
@@ -1217,8 +1219,9 @@ VBObox2.prototype.draw = function() {
   //  == specular exponent; (parseInt() converts from float to base-10 integer).
 
   // ----------------------------Draw the contents of the currently-bound VBO:
+  ModelMatrix = this.ModelMatrix;
   this.vboVerts = vertexCount;
-  gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
 VBObox2.prototype.reload = function() {
@@ -1293,4 +1296,8 @@ function CreateVBO(){
 
   vertexCount = initVBO() / 4;  //From IoccoVittorio_ProC.js
   console.log(vertexCount);
+}
+
+function updateModelMatrix(matrix){
+  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, ModelMatrix.elements);
 }
