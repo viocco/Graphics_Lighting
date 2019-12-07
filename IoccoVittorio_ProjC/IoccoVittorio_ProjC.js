@@ -58,26 +58,15 @@ var g_wing_angle_last = Date.now();
 var g_wing_angle_rate = 450;
 var g_wing_dir = 1;
 
+// Lily Pads
+var lily_count = 5;
+var g_lilys = [];
 // Logs
 var log_count = 7;
 var g_logs = [];
 // Rocks
 var rock_count = 9;
 var g_rocks = [];
-// Tick function
-var tick = function() {
-  if (tracker.animate_toggle) {
-    draw();
-    g_angle = animate(g_angle);
-    g_wing_angle = animateWings(g_wing_angle);
-    if (tracker.cattail_sway) {
-      for (var i = 0; i < g_cattails.length; i++) {
-        sway(i);
-      }
-    }
-    requestAnimationFrame(tick, g_canvasID);
-  }
-};
 
 // Event handler vars
 var g_isDrag = false;
@@ -93,43 +82,46 @@ var g_dragonfly_x = 0;
 var g_dragonfly_y = 0;
 var g_dragonfly_z = 0;
 
+function addDragonfly() {
+  g_dragonflies.push([
+    Math.random()*2-1,              // x
+    Math.random()*2-1,              // y
+    Math.random()*0.5,              // offset x
+    Math.random()*0.5,              // offset y
+    Math.random() * 0.8 / g_aspect, // random point of interest x
+    Math.random() * 0.8,            // random point of interest y
+    0,                              // timeout
+    Math.random()*2-1,              // z
+    Math.random()*2-1,              // random point of interest z
+    1,                              // head vector x
+    0,                              // head vector y
+    0,                              // head vector z
+  ]);
+}
+
+function removeDragonfly() {
+  g_dragonflies.pop();
+}
+
+function addCattail() {
+  g_cattails.push([
+    Math.random() * 20 - 10,             // x
+    Math.random() * 20 - 10,             // y
+    0,                                  // z
+    Math.random() * g_cattail_max_sway, // starting angle
+    Date.now(),                         // last tick
+    Math.random() < 0.5 ? -1 : 1        // starting direction
+  ]);
+}
+
+function removeCattail() {
+  g_cattails.pop();
+}
+
 /**
- * Main function.
- *
- * Initializes everything, then starts the main draw loop.
+ * Initializes the meta variables of each drawn item.
  */
-function main1() {
-  /* Init vars */
-  // Fix canvas size
-  //g_canvasID = document.getElementById('webgl');
-  //g_canvasID.width = window.innerWidth;
-  //g_canvasID.height = window.innerHeight;
-  //gl = init();
-  //ModelMatrix = new Matrix4();
-  //updateModelMatrix(ModelMatrix);
-  //gl.clearColor(0.5, 0.7, 1, 1.0);
-  //gl.enable(gl.DEPTH_TEST);
-
-  /* Init Functions */
-  //initGui();
-  //initVBO();
-
-  /* Init event listeners */
-	//window.addEventListener("keydown", myKeyDown, false);
-  //window.addEventListener("mousedown", myMouseDown);
-  //window.addEventListener("mousemove", myMouseMove);
-	// window.addEventListener("mouseup", myMouseUp);
-  // (function() {
-  //     document.onmousemove = handleMouseMove;
-  //     function handleMouseMove(event) {
-  //         var eventDoc, doc, body;
-  //         // IE compat
-  //         event=event||window.event;if(event.pageX==null&&event.clientX!=null){eventDoc=(event.target&&event.target.ownerDocument)||document;doc=eventDoc.documentElement;body=eventDoc.body;event.pageX=event.clientX+(doc&&doc.scrollLeft||body&&body.scrollLeft||0)-(doc&&doc.clientLeft||body&&body.clientLeft||0);event.pageY=event.clientY+(doc&&doc.scrollTop||body&&body.scrollTop||0)-(doc&&doc.clientTop||body&&body.clientTop||0);}
-  //         g_mouse_x = event.pageX / (window.innerWidth * g_aspect);
-  //         g_mouse_y = event.pageY / window.innerHeight;
-  //     }
-  //})(); // mousemove
-
+function initObjects() {
   /* Randomize forest */
   for (var i = 0; i < cattail_count; i++) {
     addCattail();
@@ -137,6 +129,15 @@ function main1() {
   /* Randomize Dragonflies */
   for (var i = 0; i < dragonfly_count; i++) {
     addDragonfly();
+  }
+  /* Randomize Lily Pads */
+  for (var i = 0; i < lily_count; i++) {
+    g_lilys.push([
+      Math.random() * 40 - 20, // x
+      Math.random() * 40 - 20, // y
+      Math.random() * 360, // rot
+      Math.random() + 1, // scale
+    ]);
   }
   /* Randomize Logs */
   for (var i = 0; i < log_count; i++) {
@@ -156,47 +157,6 @@ function main1() {
       Math.random() * 2 + 1, // scale
     ]);
   }
-
-  /* Start main draw loop */
-  //tick();
-}
-
-function addDragonfly() {
-  g_dragonflies.push([
-    Math.random()*2-1,              // x
-    Math.random()*2-1,              // y
-    Math.random()*0.5,              // offset x
-    Math.random()*0.5,              // offset y
-    Math.random() * 0.8 / g_aspect, // random point of interest x
-    Math.random() * 0.8,            // random point of interest y
-    0,                              // timeout
-    Math.random()*2-1,              // z
-    Math.random()*2-1,              // random point of interest z
-    1,                              // head vector x
-    0,                              // head vector y
-    0,                              // head vector z
-  ]);
-}
-
-main1();
-
-function removeDragonfly() {
-  g_dragonflies.pop();
-}
-
-function addCattail() {
-  g_cattails.push([
-    Math.random() * 20 - 10,             // x
-    Math.random() * 20 - 10,             // y
-    0,                                  // z
-    Math.random() * g_cattail_max_sway, // starting angle
-    Date.now(),                         // last tick
-    Math.random() < 0.5 ? -1 : 1        // starting direction
-  ]);
-}
-
-function removeCattail() {
-  g_cattails.pop();
 }
 
 /*
@@ -231,12 +191,6 @@ function initVBO() {
     norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
 
-
-  //console.log(normals);
-  //console.log(float_colors);
-  //console.log(positions)
-
-  //return pos.length; //From VBObox-Lib.js
   /* CONE */
   // Tip: {start: (g_step * 6) + 4, len: 1}
   pos.push(0, 0, 1, 1);
@@ -258,7 +212,6 @@ function initVBO() {
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
-
 
   /* Order of push:
      1. Top right wing (front/z+): 0-46
@@ -398,54 +351,48 @@ function initVBO() {
   while (colors.length / 3 > pos.length / 4) {
     colors.pop();
   }
-
   while (norms.length / 3 < pos.length / 4) {
     norms.push(0, 0, 1);
   }
+  console.assert(pos.length / 4 == colors.length / 3 && colors.length / 3 == norms.length / 3,
+    "Array lengths don't match: pos {" + pos.length / 4 + "}, colors {" + colors.length / 3 + "}, norms {" + norms.length / 3 + "}");
 
-   /* ABDOMEN */
+  /* ABDOMEN */
 
-   // Circle: {start: 188, len: (g_step * 2) + 2}
-   pos.push(0, 0, 0, 1);
-   colors.push(.03, .13, .29);
-   norms.push(0, 0, 0);
-   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
-     colors.push(.03, .25, .68);
-     norms.push(Math.cos(theta), 0, Math.sin(theta));
-   }
+  // Circle: {start: 188, len: (g_step * 2) + 2}
+  pos.push(0, 0, 0, 1);
+  colors.push(.03, .13, .29);
+  norms.push(0, 0, 0);
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
+    colors.push(.03, .25, .68);
+    norms.push(Math.cos(theta), 0, Math.sin(theta));
+  }
 
   // Brown Tube: {start: 206, len: (g_step * 4) + 2}
-   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
-     pos.push(Math.cos(theta), 1, Math.sin(theta), 1);
-     colors.push(.03, .13, (theta - .9 * theta) % 255);
-     colors.push(.03, (.13 * theta) % 255, (theta - .7 * theta) % 255);
-     norms.push(Math.cos(theta), 0, Math.sin(theta));
-     norms.push(Math.cos(theta), 1, Math.sin(theta));
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
+    pos.push(Math.cos(theta), 1, Math.sin(theta), 1);
+    colors.push(.03, .13, (theta - .9 * theta) % 255);
+    colors.push(.03, (.13 * theta) % 255, (theta - .7 * theta) % 255);
+    norms.push(Math.cos(theta), 0, Math.sin(theta));
+    norms.push(Math.cos(theta), 1, Math.sin(theta));
+  }
 
-   }
-   while (colors.length / 3 > pos.length / 4) { // Just in case, ran in to some trouble here earlier
-     colors.pop();
-   }
+  // Cone Tip: {start: (g_step * 6) + 4, len: 1}
+  pos.push(0, 1, 0, 1);
+  colors.push(.03, .13, .29);
+  norms.push(0, 1, 0);
 
+  // Cone Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
+    colors.push(.03, .13, .29);
+    norms.push(Math.cos(theta), 0, Math.sin(theta));
+  }
 
-
-   // Cone Tip: {start: (g_step * 6) + 4, len: 1}
-   pos.push(0, 1, 0, 1);
-   colors.push(.03, .13, .29);
-   norms.push(0, 1, 0);
-
-   // Cone Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
-   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
-     colors.push(.03, .13, .29);
-     norms.push(Math.cos(theta), 0, Math.sin(theta));
-   }
-
-
-   // Head cube: {start: (g_step * 8) + 7, len: 9}
-   pos.push( 0, 1, 1, 1,
+  // Head cube: {start: (g_step * 8) + 7, len: 9}
+  pos.push( 0, 1, 1, 1,
              0, 0, 1, 1,
              1, 1, 1, 1,
              1, 0, 1, 1,
@@ -464,15 +411,14 @@ function initVBO() {
              0, 0, 0, 1,
              0, 0, 1, 1);
   for (var i = 0; i < 9; i++) {
-     colors.push(.03, .13, .29);
-     colors.push(.05, .40, .55);
-     norms.push(0, 0, 1);
-     norms.push(0, 0, 1);
+    colors.push(.03, .13, .29);
+    colors.push(.05, .40, .55);
+    norms.push(0, 0, 1);
+    norms.push(0, 0, 1);
   }
 
-
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
-  var sphereVerts = makeSphere2(12, 21);
+  var sphereVerts = makeSphere2(139.0/255.0, 69.0/255.0, 19.0/255.0);
   sphereStart = (pos.length / 4) - 1;
   sphereLen = sphereVerts[0].length / 4;
   pos.push.apply(pos, sphereVerts[0]);
@@ -480,7 +426,7 @@ function initVBO() {
   norms.push.apply(norms, sphereVerts[2]);
 
   // Sphere (eyes): {start: sphereStart, len: sphereLen}
-  sphereVerts = makeSphere2(4, 21);
+  sphereVerts = makeSphere2(0, 0, 0);
   sphereStart2 = (pos.length / 4) - 1;
   sphereLen2 = sphereVerts.length / 7;
   pos.push.apply(pos, sphereVerts[0]);
@@ -500,7 +446,6 @@ function initVBO() {
   }
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
-  //console.log(pos.g);
   pos.push(.3,1,.7,1);
   pos.push(-.3,1,.7,1);
   pos.push(0,0,0,1);
@@ -524,7 +469,7 @@ function initVBO() {
 
   // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;
-  sphereVerts = makeSphere2(12, 21);
+  sphereVerts = makeSphere2(247.0/255.0, 246.0/255.0, 158.0/255.0);
   sphereStart3 = lilyStart + lilyLen + 6;
   sphereLen3 = sphereVerts[0].length / 4;
   pos.push.apply(pos, sphereVerts[0]);
@@ -650,10 +595,10 @@ function initVBO() {
     }
   }
 
-  appendPositions(pos); //From VBObox-Lib.js
-  appendColors(colors); //From VBObox-Lib.js
-  appendNormals(norms); //From VBObox-Lib.js
-  return pos.length; //From VBObox-Lib.js
+  appendPositions(pos);  //From VBObox-Lib.js
+  appendColors(colors);  //From VBObox-Lib.js
+  appendNormals(norms);  //From VBObox-Lib.js
+  return pos.length / 4; //From VBObox-Lib.js
 }
 
 function lerp(a, b, l) {
@@ -672,26 +617,11 @@ function drawResize() {
 function draw() {
   pushMatrix(ModelMatrix);
 
-  //gl.viewport(0, 0, g_canvasID.width / 2, g_canvasID.height);
-	//var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
-  // ModelMatrix.setPerspective(40 * vpAspect, vpAspect, 1, 100);
-  // ModelMatrix.lookAt(
-  //   g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
-  //   g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
-  //   g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
-  // );
   ModelMatrix.setTranslate(0, 0, 0);
-  // ModelMatrix.scale(1 / vpAspect, 1, 1);
 
-  //draw world Axes
-  //drawAxes();
-
-  //drawGround
-  //drawGroundGrid();
-
-  //drawLilyPad
-  drawLilyPad();
-
+  for (var i = 0; i < lily_count; i++) {
+    drawLilyPads(g_lilys[i][0], g_lilys[i][1], g_lilys[i][2], g_lilys[i][3]);
+  }
   for (var i = 0; i < rock_count; i++) {
     drawRocks(g_rocks[i][0], g_rocks[i][1], g_rocks[i][2], g_rocks[i][3]);
   }
@@ -703,10 +633,9 @@ function draw() {
   }
   for (var i = 0; i < cattail_count; i++) {
     drawCattail(g_cattails[i][0], g_cattails[i][1], g_cattails[i][2], g_cattails[i][3]);
-  } 
+  }
 
   ModelMatrix = popMatrix();
-
 }
 
 /*
@@ -814,6 +743,11 @@ function drawStalk(c_sway) {
   ModelMatrix = popMatrix();
 }
 
+/*
+ * Draws a dragonfly at a given position.
+ *
+ * @param d the dragonfly to draw.
+ */
 function drawDragonfly(d) {
 
   // Chase random on-screen positions
@@ -850,7 +784,6 @@ function drawDragonfly(d) {
   var legy = g_dragonflies[d][5] - g_dragonflies[d][1];
   var moveRotation = Math.acos(legy/hypotenuse) * 180/Math.PI;
 
-
   /* Group: Dragonfly */
   pushMatrix(ModelMatrix);
   ModelMatrix.translate(g_dragonflies[d][0],g_dragonflies[d][1],g_dragonflies[d][7]);
@@ -861,7 +794,7 @@ function drawDragonfly(d) {
   drawAbdomen();
   drawWings();
   drawTail();
-  drawAxes()
+
   /* End Group: Dragonfly */
   ModelMatrix = popMatrix();
 }
@@ -1107,12 +1040,14 @@ function drawGroundGrid() {
   ModelMatrix = popMatrix();
 }
 
-function drawLilyPad() {
+function drawLilyPads(x, y, rot, scale) {
   //LILY PAD -- PART 1 (LARGE UPPPER)
   //draw LilyPad (top)
   pushMatrix(ModelMatrix)
-  ModelMatrix.translate(-4.5, -4.5, -0.99);
-  //ModelMatrix.scale(.2,.2,.2);
+  ModelMatrix.translate(x, y, -0.79);
+  ModelMatrix.rotate(rot, 0, 0, 1);
+  // ModelMatrix.scale(scale, scale, scale);
+  // ModelMatrix.scale(.2,.2,.2);
   pushMatrix(ModelMatrix);
   // ModelMatrix.scale(.5,.5,.5);
   //ModelMatrix.translate(0,0,-1);
@@ -1313,257 +1248,4 @@ function randomize_sway() {
     g_cattails[i][4] = Date.now();
     g_cattails[i][5] = Math.random() < 0.5 ? -1 : 1;
   }
-}
-
-function toggle_help() {
-  help_visible = !help_visible;
-  document.getElementById("help-menu-expanded").style.visibility = help_visible ? "visible" : "hidden";
-  document.getElementById("help-menu").innerHTML = help_visible ? "Hide Help" : "Show Help";
-}
-
-/* Event Handlers */
-
-function myMouseDown(ev) {
-  if (!tracker.animate_toggle)
-    return;
-  var rect = ev.target.getBoundingClientRect();
-  var xp = ev.clientX - rect.left;
-  var yp = g_canvasID.height - (ev.clientY - rect.top);
-
-  var x = (xp - g_canvasID.width/2)  / (g_canvasID.width/2);
-	var y = (yp - g_canvasID.height/2) / (g_canvasID.height/2);
-
-	g_isDrag = true;
-	g_xMclik = x;
-	g_yMclik = y;
-	g_xMDown = x;
-	g_yMDown = y;
-}
-
-function myMouseMove(ev) {
-  if (!tracker.animate_toggle)
-    return;
-  if (g_isDrag==false)
-    return;
-
-  var rect = ev.target.getBoundingClientRect();
-  var xp = ev.clientX - rect.left;
-  var yp = g_canvasID.height - (ev.clientY - rect.top);
-
-  var x = (xp - g_canvasID.width/2)  / (g_canvasID.width/2);
-  var y = (yp - g_canvasID.height/2) / (g_canvasID.height/2);
-
-  g_xMdragTot += (x - g_xMclik);
-  g_yMdragTot += (y - g_yMclik);
-
-	g_xMclik = x;
-	g_yMclik = y;
-}
-
-function myMouseUp(ev) {
-  if (!tracker.animate_toggle)
-    return;
-  var rect = ev.target.getBoundingClientRect();
-  var xp = ev.clientX - rect.left;
-	var yp = g_canvasID.height - (ev.clientY - rect.top);
-
-  var x = (xp - g_canvasID.width/2)  / (g_canvasID.width/2);
-	var y = (yp - g_canvasID.height/2) / (g_canvasID.height/2);
-
-	g_isDrag = false;
-	g_xMdragTot += (x - g_xMclik);
-	g_yMdragTot += (y - g_yMclik);
-
-  var drag_dist = Math.sqrt(Math.abs(Math.pow(g_yMDown - y, 2) * Math.pow(g_xMDown - x, 2)));
-}
-
-function myKeyDown(kev) {
-  var code;
-  if (!kev.code) {
-    code = "" + kev.keyCode;
-  } else {
-    code = kev.code;
-  }
-  switch(code) {
-		case "KeyP":
-    case "80":
-			if (tracker.animate_toggle) {
-			  tracker.animate_toggle = false;
-		  }
-			else {
-			  tracker.animate_toggle = true;
-        g_last = Date.now();
-        for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-			  tick();
-		  }
-			break;
-    case "Slash":
-    case "191":
-      toggle_help();
-      break;
-    case "Period":
-    case "190":
-      gui_open = !gui_open;
-      if (gui_open) gui.open(); else gui.close();
-      break;
-		case "KeyW":
-    case "87":
-    case "ArrowUp":
-      var D = [
-        (g_perspective_lookat[0] - g_perspective_eye[0]) * 0.5,
-        (g_perspective_lookat[1] - g_perspective_eye[1]) * 0.5,
-        (g_perspective_lookat[2] - g_perspective_eye[2]) * 0.5,
-      ];
-      g_perspective_eye[0] += D[0];
-      g_perspective_lookat[0] += D[0];
-      g_perspective_eye[1] += D[1];
-      g_perspective_lookat[1] += D[1];
-      g_perspective_eye[2] += D[2];
-      g_perspective_lookat[2] += D[2];
-			break;
-		case "KeyA":
-    case "65":
-    case "ArrowLeft":
-      var D = [
-        g_perspective_lookat[0] - g_perspective_eye[0],
-        g_perspective_lookat[1] - g_perspective_eye[1],
-        0
-      ];
-      // Cross Product
-      var C = [
-        (D[1] * 1 - D[2] * 0) * 0.5,
-        (D[2] * 0 - D[0] * 1) * 0.5,
-        0 // (D[0] * 0 - D[1] * 0) * 0.5
-      ];
-      g_perspective_eye[0] -= C[0];
-      g_perspective_lookat[0] -= C[0];
-      g_perspective_eye[1] -= C[1];
-      g_perspective_lookat[1] -= C[1];
-			break;
-		case "KeyS":
-    case "83":
-    case "ArrowDown":
-      var D = [
-        (g_perspective_lookat[0] - g_perspective_eye[0]) * 0.5,
-        (g_perspective_lookat[1] - g_perspective_eye[1]) * 0.5,
-        (g_perspective_lookat[2] - g_perspective_eye[2]) * 0.5,
-      ];
-      g_perspective_eye[0] -= D[0];
-      g_perspective_lookat[0] -= D[0];
-      g_perspective_eye[1] -= D[1];
-      g_perspective_lookat[1] -= D[1];
-      g_perspective_eye[2] -= D[2];
-      g_perspective_lookat[2] -= D[2];
-			break;
-    case "KeyD":
-    case "68":
-    case "ArrowRight":
-      var D = [
-        g_perspective_lookat[0] - g_perspective_eye[0],
-        g_perspective_lookat[1] - g_perspective_eye[1],
-        0
-      ];
-      // Cross Product
-      var C = [
-        (D[1] * 1 - D[2] * 0) * 0.5,
-        (D[2] * 0 - D[0] * 1) * 0.5,
-        0 // (D[0] * 0 - D[1] * 0) * 0.5
-      ];
-      g_perspective_eye[0] += C[0];
-      g_perspective_lookat[0] += C[0];
-      g_perspective_eye[1] += C[1];
-      g_perspective_lookat[1] += C[1];
-			break;
-    case "KeyI":
-    case "73":
-      g_perspective_lookat[2] += 0.05;
-      break;
-    case "KeyJ":
-    case "74":
-      theta += 0.05;
-      g_perspective_lookat[0] = g_perspective_eye[0] + Math.cos(theta);
-      g_perspective_lookat[1] = g_perspective_eye[1] + Math.sin(theta);
-      break;
-    case "KeyK":
-    case "75":
-      g_perspective_lookat[2] -= 0.05;
-      break;
-    case "KeyL":
-    case "76":
-      theta -= 0.05;
-      g_perspective_lookat[0] = g_perspective_eye[0] + Math.cos(theta);
-      g_perspective_lookat[1] = g_perspective_eye[1] + Math.sin(theta);
-      break;
-    case "KeyR":
-    case "82":
-      tracker.reset();
-      break;
-    case "Digit1":
-    case "49":
-      g_cattail_max_sway = 2;
-      g_cattail_rate = 0.8;
-      randomize_sway();
-      break;
-    case "Digit2":
-    case "50":
-      g_cattail_max_sway = 3;
-      g_cattail_rate = 1.6;
-      randomize_sway();
-      break;
-    case "Digit3":
-    case "51":
-      g_cattail_max_sway = 4;
-      g_cattail_rate = 2.4;
-      randomize_sway();
-      break;
-    case "Digit4":
-    case "52":
-      g_cattail_max_sway = 5;
-      g_cattail_rate = 3.2;
-      randomize_sway();
-      break;
-    case "Digit5":
-    case "53":
-      g_cattail_max_sway = 6;
-      g_cattail_rate = 4.0;
-      randomize_sway();
-      break;
-    case "Digit6":
-    case "54":
-      g_cattail_max_sway = 7;
-      g_cattail_rate = 4.8;
-      randomize_sway();
-      break;
-    case "Digit7":
-    case "55":
-      g_cattail_max_sway = 8;
-      g_cattail_rate = 5.6;
-      randomize_sway();
-      break;
-    case "Digit8":
-    case "56":
-      g_cattail_max_sway = 9;
-      g_cattail_rate = 6.4;
-      randomize_sway();
-      break;
-    case "Digit9":
-    case "57":
-      g_cattail_max_sway = 10;
-      g_cattail_rate = 7.2;
-      randomize_sway();
-      break;
-    case "Digit0":
-    case "48": // That's super annoying! Why is it 48?? Why not 58??
-      g_cattail_max_sway = 11;
-      g_cattail_rate = 8.0;
-      randomize_sway();
-      break;
-    case "KeyF":
-    case "70":
-      onDragonfly = !onDragonfly;
-      epsilon = onDragonfly ? 0.01 : 0.5;
-    default:
-      console.log("Unused key: " + code);
-      break;
-	}
 }

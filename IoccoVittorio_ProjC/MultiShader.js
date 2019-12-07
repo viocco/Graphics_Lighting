@@ -56,6 +56,21 @@ var g_posMax1 = 1.0; // max, min allowed positions
 var g_posMin1 = -1.0;
 //---------------
 
+var tick = function() {
+  if (tracker.animate_toggle) {
+    g_angle = animate(g_angle);
+    g_wing_angle = animateWings(g_wing_angle);
+    if (tracker.cattail_sway) {
+      for (var i = 0; i < g_cattails.length; i++) {
+        sway(i);
+      }
+    }
+    requestAnimationFrame(tick, g_canvasID);
+    timerAll();
+    drawAll();
+  }
+};
+
 // Camera vars
 var g_perspective_eye = [15, 0, 0]; // where the camera is
 var g_perspective_lookat = [14, 0, 0]; // where the camera is pointing
@@ -95,16 +110,12 @@ function main() {
   part1Box.init(gl);
   part2Box.init(gl);
 
-  gl.clearColor(0.2, 0.2, 0.2, 1);
+  gl.clearColor(0.5, 0.7, 1, 1.0);
   gl.enable(gl.DEPTH_TEST);
 
   window.addEventListener("keydown", myKeyDown, false);
+  initObjects();
 
-  var tick = function() {
-    requestAnimationFrame(tick, g_canvasID);
-    timerAll();
-    drawAll();
-  };
   tick();
 }
 
@@ -275,6 +286,26 @@ function myKeyDown(kev) {
       theta -= 0.05;
       g_perspective_lookat[0] = g_perspective_eye[0] + Math.cos(theta);
       g_perspective_lookat[1] = g_perspective_eye[1] + Math.sin(theta);
+      break;
+		case "KeyP":
+    case "80":
+			if (tracker.animate_toggle) {
+			  tracker.animate_toggle = false;
+		  }
+			else {
+			  tracker.animate_toggle = true;
+        g_last = Date.now();
+        for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
+			  tick();
+		  }
+			break;
+    case "Slash":
+    case "191":
+      toggle_help();
+      break;
+    case "Period":
+    case "190":
+      toggle_gui();
       break;
     default:
       console.log("Unused key: " + code);

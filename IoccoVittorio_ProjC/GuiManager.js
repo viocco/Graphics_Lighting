@@ -82,7 +82,7 @@ var help_visible = false;
  * Initializes the GUI at startup, registers variable state listeners.
  */
 function initGui() {
-  gui = new dat.GUI({name: 'My GUI'});
+  gui = new dat.GUI({name: 'My GUI', hideable: false});
   var shading = gui.addFolder('Shading');
   shading.add(tracker, 'gouraud').name('Gouraud Shading').listen().onChange(function(){tracker.gouraud = true; tracker.phong = false;});
   shading.add(tracker, 'phong').name('Phong Shading').listen().onChange(function(){tracker.gouraud = false; tracker.phong = true;});
@@ -123,6 +123,21 @@ function initGui() {
   gui.add(tracker, 'reset').name('Reset');
   if (!gui_open)
     gui.close();
+  document.getElementsByClassName('close-bottom')[0].onclick = function() {gui_open = !gui_open;};
+}
+
+function toggle_gui() {
+  gui_open = !gui_open;
+  if (gui_open)
+    gui.open();
+  else
+    gui.close();
+}
+
+function toggle_help() {
+  help_visible = !help_visible;
+  document.getElementById("help-menu-expanded").style.visibility = help_visible ? "visible" : "hidden";
+  document.getElementById("help-menu").innerHTML = help_visible ? "Hide Help" : "Show Help";
 }
 
 initGui();

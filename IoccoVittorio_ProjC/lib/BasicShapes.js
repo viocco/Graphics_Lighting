@@ -91,7 +91,7 @@ function makeSphere2(r, g, b) {
   // for() loop's s var counts slices;
   // 				  its v var counts vertices;
   // 					its j var counts Float32Array elements
-  //					(vertices * elements per vertex) 
+  //					(vertices * elements per vertex)
   var j = 0; // initialize our array index
   var k = 0;
   var isFirstSlice = 1; // ==1 ONLY while making south-pole slice; 0 otherwise
@@ -142,9 +142,9 @@ function makeSphere2(r, g, b) {
         sphVerts[j + 2] = sinTop; // z
         sphVerts[j + 3] = 1;
       }
-      sphColors[j - k] = Math.random(); // r;
-      sphColors[j - k + 1] = Math.random(); // g;
-      sphColors[j - k + 2] = Math.random(); // b;
+      sphColors[j - k] = r;
+      sphColors[j - k + 1] = g;
+      sphColors[j - k + 2] = b;
 
       sphNorms[j - k] = sphVerts[j];
       sphNorms[j - k + 1] = sphVerts[j + 1];

@@ -880,19 +880,6 @@ function VBObox2() {
           // X Y Z W | Position (4)
           // R G B   | Color (3)
           // I J K   | Normal (3)
-  //pos = [];
-  //colors = [];
-  //norms = [];
-
-  // Sphere
-  //sphere = makeSphere2(1, 0, 0);
-  //pos.push.apply(pos,sphere[0]);
-  //colors.push.apply(colors,sphere[1]);
-  //norms.push.apply(norms,sphere[2]);
-
-  //appendPositions(pos);
-  //appendColors(colors);
-  //appendNormals(norms);
 
   this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
 
@@ -901,7 +888,7 @@ function VBObox2() {
   this.vboFcount_a_Colr1 = colorsDimensions;
   this.vboFcount_a_Normal1 = normalsDimensions;
 
-  //console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3),
+  // console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3),
   //            "Number of vertices across positions, colors, and normals vectors not equal");
 
   this.vboVerts = vertexCount / 4;
@@ -1296,8 +1283,7 @@ function CreateVBO(){
           // R G B   | Color (3)
           // I J K   | Normal (3)
 
-  vertexCount = initVBO() / 4;  //From IoccoVittorio_ProC.js
-  //console.log(vertexCount);
+  vertexCount = initVBO();  //From IoccoVittorio_ProC.js
 }
 
 function updateModelMatrix(matrix){
