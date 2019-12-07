@@ -112,6 +112,7 @@ var positions  = new Float32Array(numVertices*posDimensions);
 var float_colors = new Float32Array(numVertices*colorsDimensions);
 var normals = new Float32Array(numVertices*normalsDimensions);
 var g_step = 8.0; // [4, +inf]
+var u_ModelMatrixLoc;
 
 // Ground Plane
 function VBObox0() {
@@ -734,6 +735,7 @@ VBObox1.prototype.adjust = function() {
   //this.ModelMatrix.scale(0.8, 0.8, 0.8);
 	//this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
   ModelMatrix = this.ModelMatrix;
+  u_ModelMatrixLoc = this.u_ModelMatrixLoc;
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, ModelMatrix.elements);
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 	gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, this.ModelMatrix.transpose().invert().elements);
@@ -1299,5 +1301,5 @@ function CreateVBO(){
 }
 
 function updateModelMatrix(matrix){
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, matrix.elements);
+  gl.uniformMatrix4fv(u_ModelMatrixLoc, false, matrix.elements);
 }
