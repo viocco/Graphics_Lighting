@@ -690,12 +690,12 @@ function draw() {
   //drawGroundGrid();
 
   //drawLilyPad
-  //drawLilyPad();
+  drawLilyPad();
 
   for (var i = 0; i < rock_count; i++) {
     drawRocks(g_rocks[i][0], g_rocks[i][1], g_rocks[i][2], g_rocks[i][3]);
   }
-  /*for (var i = 0; i < log_count; i++) {
+  for (var i = 0; i < log_count; i++) {
     drawLogs(g_logs[i][0], g_logs[i][1], g_logs[i][2], g_logs[i][3]);
   }
   for (var i = 0; i < dragonfly_count; i++) {
@@ -703,7 +703,7 @@ function draw() {
   }
   for (var i = 0; i < cattail_count; i++) {
     drawCattail(g_cattails[i][0], g_cattails[i][1], g_cattails[i][2], g_cattails[i][3]);
-  } */
+  } 
 
   ModelMatrix = popMatrix();
 
