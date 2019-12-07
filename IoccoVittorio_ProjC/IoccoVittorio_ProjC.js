@@ -677,7 +677,7 @@ function draw() {
   pushMatrix(ModelMatrix);
 
   //gl.viewport(0, 0, g_canvasID.width / 2, g_canvasID.height);
-	var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
+	//var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
   // ModelMatrix.setPerspective(40 * vpAspect, vpAspect, 1, 100);
   // ModelMatrix.lookAt(
   //   g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
@@ -699,12 +699,12 @@ function draw() {
   //drawGroundGrid();
 
   //drawLilyPad
-  drawLilyPad();
+  //drawLilyPad();
 
   for (var i = 0; i < rock_count; i++) {
     drawRocks(g_rocks[i][0], g_rocks[i][1], g_rocks[i][2], g_rocks[i][3]);
   }
-  for (var i = 0; i < log_count; i++) {
+  /*for (var i = 0; i < log_count; i++) {
     drawLogs(g_logs[i][0], g_logs[i][1], g_logs[i][2], g_logs[i][3]);
   }
   for (var i = 0; i < dragonfly_count; i++) {
@@ -712,7 +712,7 @@ function draw() {
   }
   for (var i = 0; i < cattail_count; i++) {
     drawCattail(g_cattails[i][0], g_cattails[i][1], g_cattails[i][2], g_cattails[i][3]);
-  }
+  } */
 
   ModelMatrix = popMatrix();
 
@@ -1121,7 +1121,7 @@ function drawLilyPad() {
   //draw LilyPad (top)
   pushMatrix(ModelMatrix)
   ModelMatrix.translate(-4.5, -4.5, -0.99);
-  // ModelMatrix.scale(.2,.2,.2);
+  //ModelMatrix.scale(.2,.2,.2);
   pushMatrix(ModelMatrix);
   // ModelMatrix.scale(.5,.5,.5);
   //ModelMatrix.translate(0,0,-1);

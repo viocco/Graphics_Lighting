@@ -1295,9 +1295,9 @@ function CreateVBO(){
           // I J K   | Normal (3)
 
   vertexCount = initVBO() / 4;  //From IoccoVittorio_ProC.js
-  console.log(vertexCount);
+  //console.log(vertexCount);
 }
 
 function updateModelMatrix(matrix){
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, ModelMatrix.elements);
+  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, matrix.elements);
 }
