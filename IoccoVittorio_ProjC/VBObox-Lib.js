@@ -734,11 +734,9 @@ VBObox1.prototype.adjust = function() {
 	//this.ModelMatrix.setTranslate(0, 0, 0);
   //this.ModelMatrix.scale(0.8, 0.8, 0.8);
 	//this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
-  ModelMatrix = this.ModelMatrix;
   u_ModelMatrixLoc = this.u_ModelMatrixLoc;
   gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, ModelMatrix.elements);
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
-	gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, this.ModelMatrix.transpose().invert().elements);
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
 }
@@ -757,7 +755,8 @@ VBObox1.prototype.draw = function() {
   //gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   draw();
-  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  this.ModelMatrix = ModelMatrix;
+  gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, ModelMatrix.transpose().invert().elements);
 }
 
 VBObox1.prototype.reload = function() {

@@ -17,7 +17,7 @@ var g_canvasID;
 var g_aspect = window.innerHeight / window.innerWidth;
 
 // Transformation vars
-var ModelMatrix;
+var ModelMatrix = new Matrix4();
 var g_step = 8.0; // [4, +inf]
 var wing_start;
 var sphereStart;
