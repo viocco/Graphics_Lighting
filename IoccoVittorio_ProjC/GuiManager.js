@@ -1,20 +1,26 @@
 var gui;
 var gui_open = true;
 var GuiTracker = function() {
+  // Shading
   this.gouraud = true;
   this.phong = false;
+  // Lighting
   this.blinnphong = false;
-  this.global_x_pos = 0;
-  this.global_y_pos = 0;
-  this.global_z_pos = 0;
-  this.global_x_scale = 1;
-  this.global_y_scale = 1;
-  this.global_z_scale = 1;
-  this.global_x_rot = 0;
-  this.global_y_rot = 0;
-  this.global_z_rot = 0;
+  // Lamps
+  this.headlight = true;
+  this.freelight = true;
+  this.freelight_pos_x = 1;
+  this.freelight_pos_y = 1;
+  this.freelight_pos_z = 1;
+  this.freelight_palette = {
+    ambient: '#FFFFFF',
+    diffuse: '#FFFFFF',
+    specular: '#FFFFFF'
+  };
+  // Animation
   this.animate_toggle = true;
   this.cattail_sway = true;
+  // Object Management
   this.addDragonfly = function() {
     tracker.animate_toggle = false;
     setTimeout(function(){
@@ -59,6 +65,7 @@ var GuiTracker = function() {
       tick();
     }, 10);
   };
+  // Reset
   this.reset = function() {
     this.global_x_pos = this.global_y_pos = this.global_z_pos = 0;
     this.global_x_rot = this.global_y_rot = this.global_z_rot = 0;
@@ -83,6 +90,16 @@ function initGui() {
   var lighting = gui.addFolder('Lighting');
   lighting.add(tracker, 'blinnphong').name('Blinn-Phong Lighting');
   lighting.open();
+  var lamps = gui.addFolder('Lamps');
+  lamps.add(tracker, 'headlight').name('Head Lamp Toggle');
+  lamps.add(tracker, 'freelight').name('Free Lamp Toggle');
+  lamps.add(tracker, 'freelight_pos_x').name('Free Lamp x Position');
+  lamps.add(tracker, 'freelight_pos_y').name('Free Lamp y Position');
+  lamps.add(tracker, 'freelight_pos_z').name('Free Lamp z Position');
+  lamps.add(tracker.freelight_palette, 'ambient');
+  lamps.add(tracker.freelight_palette, 'diffuse');
+  lamps.add(tracker.freelight_palette, 'specular');
+  // lamps.open();
   var anim = gui.addFolder('Animations');
   anim.add(tracker, 'animate_toggle').name('Toggle Animation').listen().onChange(function(value) {
     if (value) {

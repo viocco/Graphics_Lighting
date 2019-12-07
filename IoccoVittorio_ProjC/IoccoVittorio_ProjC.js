@@ -229,7 +229,7 @@ function initVBO() {
     colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
-  } 
+  }
 
 
   //console.log(normals);
@@ -402,7 +402,7 @@ function initVBO() {
   while (norms.length / 3 < pos.length / 4) {
     norms.push(0, 0, 1);
   }
-  
+
    /* ABDOMEN */
 
    // Circle: {start: 188, len: (g_step * 2) + 2}
@@ -429,8 +429,8 @@ function initVBO() {
      colors.pop();
    }
 
-   
-   
+
+
    // Cone Tip: {start: (g_step * 6) + 4, len: 1}
    pos.push(0, 1, 0, 1);
    colors.push(.03, .13, .29);
@@ -469,8 +469,8 @@ function initVBO() {
      norms.push(0, 0, 1);
      norms.push(0, 0, 1);
   }
-  
-  
+
+
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
   var sphereVerts = makeSphere2(12, 21);
   sphereStart = (pos.length / 4) - 1;
@@ -485,7 +485,7 @@ function initVBO() {
   sphereLen2 = sphereVerts.length / 7;
   pos.push.apply(pos, sphereVerts[0]);
   colors.push.apply(colors, sphereVerts[1]);
-  norms.push.apply(norms, sphereVerts[2]); 
+  norms.push.apply(norms, sphereVerts[2]);
 
   // Lilypad Circle: {start: 1384 + gndverts.length, len: (8.5 * 2) + 2}
   pos.push(0, 0, 0, 1);
@@ -497,7 +497,7 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(20/255, (theta+110)/255.0, 10/255);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-  } 
+  }
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
   //console.log(pos.g);
@@ -530,7 +530,7 @@ function initVBO() {
   pos.push.apply(pos, sphereVerts[0]);
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
-  
+
   // Fallen log
   var logStep = g_step * 2;
   logStart = pos.length / 4;
@@ -670,13 +670,8 @@ function drawResize() {
  * Main draw handler, sets up global matrix and calls other draw functions.
  */
 function draw() {
-
-  //l.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
-  // Left VP
   pushMatrix(ModelMatrix);
 
-  //gl.viewport(0, 0, g_canvasID.width / 2, g_canvasID.height);
 	var vpAspect = (g_canvasID.width / 2) / g_canvasID.height;
   // ModelMatrix.setPerspective(40 * vpAspect, vpAspect, 1, 100);
   // ModelMatrix.lookAt(
@@ -685,12 +680,7 @@ function draw() {
   //   g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
   // );
   ModelMatrix.setTranslate(0, 0, 0);
-  //ModelMatrix.scale(1 / vpAspect, 1, 1);
-  ModelMatrix.translate(tracker.global_x_pos, tracker.global_y_pos, tracker.global_z_pos);
-  ModelMatrix.rotate(tracker.global_x_rot, 1, 0, 0);
-  ModelMatrix.rotate(tracker.global_y_rot + g_angle, 0, 1, 0);
-  ModelMatrix.rotate(tracker.global_z_rot, 0, 0, 1);
-  ModelMatrix.scale(tracker.global_x_scale, tracker.global_y_scale, tracker.global_z_scale);
+  // ModelMatrix.scale(1 / vpAspect, 1, 1);
 
   //draw world Axes
   //drawAxes();
@@ -716,7 +706,7 @@ function draw() {
 
   ModelMatrix = popMatrix();
 
-}     
+}
 
 /*
  * Draws a cattail at a given position.
@@ -1418,7 +1408,6 @@ function myKeyDown(kev) {
 		case "KeyW":
     case "87":
     case "ArrowUp":
-      // tracker.global_y_pos -= 0.01;
       var D = [
         (g_perspective_lookat[0] - g_perspective_eye[0]) * 0.5,
         (g_perspective_lookat[1] - g_perspective_eye[1]) * 0.5,
@@ -1434,7 +1423,6 @@ function myKeyDown(kev) {
 		case "KeyA":
     case "65":
     case "ArrowLeft":
-      // tracker.global_x_pos += 0.01;
       var D = [
         g_perspective_lookat[0] - g_perspective_eye[0],
         g_perspective_lookat[1] - g_perspective_eye[1],
@@ -1454,7 +1442,6 @@ function myKeyDown(kev) {
 		case "KeyS":
     case "83":
     case "ArrowDown":
-      // tracker.global_y_pos += 0.01;
       var D = [
         (g_perspective_lookat[0] - g_perspective_eye[0]) * 0.5,
         (g_perspective_lookat[1] - g_perspective_eye[1]) * 0.5,
@@ -1470,7 +1457,6 @@ function myKeyDown(kev) {
     case "KeyD":
     case "68":
     case "ArrowRight":
-      // tracker.global_x_pos -= 0.01;
       var D = [
         g_perspective_lookat[0] - g_perspective_eye[0],
         g_perspective_lookat[1] - g_perspective_eye[1],
@@ -1511,22 +1497,6 @@ function myKeyDown(kev) {
     case "82":
       tracker.reset();
       break;
-   /* case "Equal":
-    case "187":
-    case "NumpadAdd":
-    case "107":
-      tracker.global_x_scale = Math.min(tracker.global_x_scale + .05, 2.5);
-      tracker.global_y_scale = Math.min(tracker.global_y_scale + .05, 2.5);
-      tracker.global_z_scale = Math.min(tracker.global_z_scale + .05, 2.5);
-      break;
-    case "Minus":
-    case "189":
-    case "NumpadSubtract":
-    case "109":
-      tracker.global_x_scale = Math.max(tracker.global_x_scale - 0.05, 0.05);
-      tracker.global_y_scale = Math.max(tracker.global_y_scale - 0.05, 0.05);
-      tracker.global_z_scale = Math.max(tracker.global_z_scale - 0.05, 0.05);
-      break; */
     case "Digit1":
     case "49":
       g_cattail_max_sway = 2;

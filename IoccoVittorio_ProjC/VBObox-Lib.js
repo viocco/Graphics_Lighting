@@ -1263,7 +1263,7 @@ function appendNormals(arr){
   }
 }
 
-//concatenate two Float32Arrays
+// Concatenate two Float32Arrays
 function Float32Concat(first, second){
   var firstLength = first.length,
   result = new Float32Array(firstLength + second.length);
@@ -1274,7 +1274,7 @@ function Float32Concat(first, second){
   return result;
 }
 
-//overwrite the base float32Array with a smaller 'edit' float32array starting at some index
+// Overwrite the base Float32Array with a smaller 'edit' Float32Array starting at some index
 function Float32Edit(base,edit,startIdx){
   for(var i = 0; i < edit.length;i++){
     base[i+startIdx] = edit[i];
@@ -1286,7 +1286,7 @@ function lerp(a, b, l) {
   return (a * l + (b * (1 - l)));
 }
 
-//Concatenate all attributes into a single array
+// Concatenate all attributes into a single array
 function CreateVBO(){
 
   //-------Vertices---------
