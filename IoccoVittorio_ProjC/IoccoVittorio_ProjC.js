@@ -174,11 +174,11 @@ function initVBO() {
   // Circle: {start: 0, len: (g_step * 2) + 2}
   pos.push(0, 0, 0, 1);
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-  norms.push(0, 0, 0);
+  norms.push(0, 0, 1);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(0, 0, 1);
   }
 
   // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
@@ -186,7 +186,7 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
@@ -200,7 +200,7 @@ function initVBO() {
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(Math.cos(theta), Math.sin(theta), Math.sqrt(2) / 2);
   }
 
   // Green Tube: {start: (g_step * 8) + 7, len: (g_step * 4) + 2}
@@ -212,7 +212,7 @@ function initVBO() {
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
     colors.push(16.0/255.0, 163.0/255.0, 55.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-    norms.push(Math.cos(theta), Math.sin(theta), 1);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
 
   /* Order of push:
@@ -364,11 +364,11 @@ function initVBO() {
   // Circle: {start: 188, len: (g_step * 2) + 2}
   pos.push(0, 0, 0, 1);
   colors.push(.03, .13, .29);
-  norms.push(0, 0, 0);
+  norms.push(0, 1, 0);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
     colors.push(.03, .25, .68);
-    norms.push(Math.cos(theta), 0, Math.sin(theta));
+    norms.push(0, 1, 0);
   }
 
   // Brown Tube: {start: 206, len: (g_step * 4) + 2}
@@ -378,7 +378,7 @@ function initVBO() {
     colors.push(.03, .13, (theta - .9 * theta) % 255);
     colors.push(.03, (.13 * theta) % 255, (theta - .7 * theta) % 255);
     norms.push(Math.cos(theta), 0, Math.sin(theta));
-    norms.push(Math.cos(theta), 1, Math.sin(theta));
+    norms.push(Math.cos(theta), 0, Math.sin(theta));
   }
 
   // Cone Tip: {start: (g_step * 6) + 4, len: 1}
@@ -390,7 +390,7 @@ function initVBO() {
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
     colors.push(.03, .13, .29);
-    norms.push(Math.cos(theta), 0, Math.sin(theta));
+    norms.push(Math.cos(theta), Math.sqrt(2) / 2, Math.sin(theta));
   }
 
   // Head cube: {start: (g_step * 8) + 7, len: 9}
@@ -412,11 +412,27 @@ function initVBO() {
              1, 0, 1, 1,
              0, 0, 0, 1,
              0, 0, 1, 1);
+  norms.push(-1, 1, 1,
+             -1,-1, 1,
+              1, 1, 1,
+              1,-1, 1,
+              1, 1,-1,
+              1,-1,-1,
+             -1, 1,-1,
+             -1,-1,-1,
+             -1, 1, 1,
+             -1,-1, 1,
+             -1, 1, 1,
+              1, 1, 1,
+             -1, 1,-1,
+              1, 1,-1,
+              1,-1,-1,
+              1,-1, 1,
+             -1,-1,-1,
+             -1,-1, 1,);
   for (var i = 0; i < 9; i++) {
     colors.push(.03, .13, .29);
     colors.push(.05, .40, .55);
-    norms.push(0, 0, 1);
-    norms.push(0, 0, 1);
   }
 
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
@@ -427,7 +443,7 @@ function initVBO() {
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
 
-  // Sphere (eyes): {start: sphereStart, len: sphereLen}
+  // Sphere (eyes): {start: sphereStart2, len: sphereLen2}
   sphereVerts = makeSphere2(0, 0, 0);
   sphereStart2 = (pos.length / 4) - 1;
   sphereLen2 = sphereVerts.length / 7;
@@ -435,7 +451,7 @@ function initVBO() {
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
 
-  // Lilypad Circle: {start: 1384 + gndverts.length, len: (g_step * 2) + 2}
+  // Lilypad Circle: {start: lilyStart, len: (g_step * 2) + 2}
   lilyStart = pos.length / 4;
   lilyLen = (g_step * 2) + 2;
   pos.push(0, 0, 0, 1);
@@ -444,7 +460,7 @@ function initVBO() {
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(20/255, (theta+110)/255, 10/255);
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(0, 0, 1);
   }
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
@@ -462,12 +478,12 @@ function initVBO() {
   colors.push(255/255,20/255,147/255);
   colors.push(255/255,192/255,203/255);
 
-  norms.push(.3, 1, .7);
-  norms.push(-.3, 1, .7);
-  norms.push(0, 0, 0);
-  norms.push(.3, 1, .4);
-  norms.push(-.3, 1, .4);
-  norms.push(0, 0, 1);
+  norms.push(0, -0.42, 0.6);
+  norms.push(0, -0.42, 0.6);
+  norms.push(0, -0.42, 0.6);
+  norms.push(0, -0.24, 0.6);
+  norms.push(0, -0.24, 0.6);
+  norms.push(0, -0.24, 0.6);
 
   // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;
@@ -496,12 +512,12 @@ function initVBO() {
       colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     }
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-    norms.push(Math.cos(theta), Math.sin(theta), 1);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
   logCap = pos.length / 4;
   pos.push(0, 0, 0, 1);
   colors.push(0.87, 0.52, 0.21);
-  norms.push(0, 0, 0);
+  norms.push(0, 0, 1);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/logStep); theta += Math.PI/logStep) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     var color_randomizer = Math.random();
@@ -510,7 +526,7 @@ function initVBO() {
     } else {
       colors.push(0.87, 0.52, 0.21);
     }
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(0, 0, 1);
   }
   logEnd = pos.length / 4;
 
@@ -1052,13 +1068,13 @@ function drawLilyPads(x, y, rot, scale) {
   pushMatrix(ModelMatrix);
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(75, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
   // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
