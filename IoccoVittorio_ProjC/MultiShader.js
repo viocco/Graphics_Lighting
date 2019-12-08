@@ -180,7 +180,7 @@ function drawAll() {
     part1Box.adjust();
     part1Box.draw();
   }
-  else if (tracker.phong) {
+  if (tracker.phong) {
     part2Box.switchToMe();
     part2Box.adjust();
     part2Box.draw();

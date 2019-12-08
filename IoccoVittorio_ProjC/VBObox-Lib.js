@@ -113,6 +113,7 @@ var float_colors = new Float32Array(numVertices*colorsDimensions);
 var normals = new Float32Array(numVertices*normalsDimensions);
 var g_step = 8.0; // [4, +inf]
 var u_ModelMatrixLoc;
+var u_NormalMatrixLoc;
 
 // Ground Plane
 function VBObox0() {
@@ -458,18 +459,18 @@ function VBObox1() {
 	precision mediump int;
 
 	// Uniforms
-	uniform mat4 u_ProjectionMatrix;
-  uniform mat4 u_ModelMatrix;
-	uniform mat4 u_NormalMatrix;
+	uniform mat4 u_ProjectionMatrix1;
+  uniform mat4 u_ModelMatrix1;
+	uniform mat4 u_NormalMatrix1;
 	uniform int u_useBlinnPhong;
 
 	// Attributes
 	attribute vec4 a_Pos1;
-  attribute vec3 a_Colr1;
+  attribute vec3 a_Color1;
   attribute vec3 a_Normal1;
 
 	// Varyings
-  varying vec3 v_Colr1;
+  varying vec3 v_Color1;
 	varying vec3 v_NormalInterp;
 	varying vec3 v_VertPos;
 
@@ -485,10 +486,10 @@ function VBObox1() {
 	vec3 lightPos = vec3(1.0, 1.0, -1.0);
 
   void main() {
-    vec4 vertPos = u_ModelMatrix * a_Pos1;
+    vec4 vertPos = u_ModelMatrix1 * a_Pos1;
 		v_VertPos = vec3(vertPos) / vertPos.w;
-		v_NormalInterp = vec3(u_NormalMatrix * vec4(a_Normal1, 0.0));
-		gl_Position = u_ProjectionMatrix * vertPos;
+		v_NormalInterp = vec3(u_NormalMatrix1 * vec4(a_Normal1, 0.0));
+		gl_Position = u_ProjectionMatrix1 * vertPos;
 
 		vec3 N = normalize(v_NormalInterp);
 		vec3 L = normalize(lightPos - v_VertPos);
@@ -509,23 +510,22 @@ function VBObox1() {
 			}
 		}
 
-  	v_Colr1 = vec3(Ka * a_Colr1 * 0.15 +
-									 Kd * lambertian * a_Colr1 +
+  	v_Color1 = vec3(Ka * a_Color1 * 0.15 +
+									 Kd * lambertian * a_Color1 +
 								   Ks * specular * specularColor);
 
 		// Testing defaults
-		// v_Colr1 = a_Colr1;
-		// gl_Position = u_ModelMatrix * a_Pos1;
-		// u_ProjectionMatrix; a_Normal1; u_NormalMatrix;
+		// v_Color1 = a_Color1;
+		// gl_Position = u_ModelMatrix1 * a_Pos1;
+		// u_ProjectionMatrix1; a_Normal1; u_NormalMatrix1;
   }`;
 
 	this.FRAG_SRC = `
 	precision mediump float;
-  varying vec3 v_Colr1;
+  varying vec3 v_Color1;
   void main() {
-		gl_FragColor = vec4(v_Colr1, 1.0);
+		gl_FragColor = vec4(v_Color1, 1.0);
   }`;
-
 
   this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
 
@@ -598,7 +598,7 @@ VBObox1.prototype.init = function() {
     						'.init() Failed to get GPU location of attribute a_Pos1');
     return -1;
   }
- 	this.a_Colr1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Colr1');
+ 	this.a_Colr1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Color1');
   if (this.a_Colr1Loc < 0) {
     console.log(this.constructor.name +
     						'.init() failed to get the GPU location of attribute a_Colr1');
@@ -610,19 +610,19 @@ VBObox1.prototype.init = function() {
 	    					'.init() failed to get the GPU location of attribute a_Normal1');
 	  return -1;
   }
- 	this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix');
+ 	this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix1');
   if (!this.u_ModelMatrixLoc) {
     console.log(this.constructor.name +
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
   }
-	this.u_ProjectionMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ProjectionMatrix');
+	this.u_ProjectionMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ProjectionMatrix1');
 	if (!this.u_ProjectionMatrixLoc) {
 	  console.log(this.constructor.name +
 	   						'.init() failed to get GPU location for u_ProjectionMatrix uniform');
 	  return;
 	}
-	this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix');
+	this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix1');
   if (!this.u_NormalMatrixLoc) {
     console.log(this.constructor.name +
      						'.init() failed to get GPU location for u_NormalMatrix uniform');
@@ -731,14 +731,12 @@ VBObox1.prototype.adjust = function() {
     g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
     g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
   );
-	//this.ModelMatrix.setTranslate(0, 0, 0);
-  //this.ModelMatrix.scale(0.8, 0.8, 0.8);
-	//this.ModelMatrix.rotate(g_angleNow0, 1, 1, 1);
-  u_ModelMatrixLoc = this.u_ModelMatrixLoc;
-  gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, ModelMatrix.elements);
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
+
+	u_ModelMatrixLoc = this.u_ModelMatrixLoc;
+	u_NormalMatrixLoc = this.u_NormalMatrixLoc;
 }
 
 VBObox1.prototype.draw = function() {
@@ -750,13 +748,8 @@ VBObox1.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
-  this.vboVerts = vertexCount;
-  //this.ModelMatrix.translate(0, 0, 2);
-  //gl.uniformMatrix4fv(this.u_ModelMatrixLoc, false, this.ModelMatrix.elements);
-  // ----------------------------Draw the contents of the currently-bound VBO:
+
   draw();
-  this.ModelMatrix = ModelMatrix;
-  gl.uniformMatrix4fv(this.u_NormalMatrixLoc, false, ModelMatrix.transpose().invert().elements);
 }
 
 VBObox1.prototype.reload = function() {
@@ -786,34 +779,34 @@ function VBObox2() {
    };
 
   // ATTRIBUTES
-  attribute vec4 a_Position;
-  attribute vec3 a_Normal;
-  attribute vec3 a_Color;
+  attribute vec4 a_Position2;
+  attribute vec3 a_Normal2;
+  attribute vec3 a_Color2;
 
   // UNIFORMS
   // uniform vec3 u_Kd;        // Phong diffuse reflectance for the entire shape
-  uniform MatlT u_MatlSet[1];  // Array of all materials
-  uniform mat4 u_MvpMatrix;
-  uniform mat4 u_ModelMatrix;  // Model matrix
-  uniform mat4 u_NormalMatrix; // Inverse Transpose of ModelMatrix
+  uniform MatlT u_MatlSet2[1];  // Array of all materials
+  uniform mat4 u_ProjectionMatrix2;
+  uniform mat4 u_ModelMatrix2;  // Model matrix
+  uniform mat4 u_NormalMatrix2; // Inverse Transpose of ModelMatrix
 
   // VARYING
-  varying vec3 v_Colr; // Phong Lighting: diffuse reflectance
+  varying vec3 v_Color; // Phong Lighting: diffuse reflectance
   varying vec3 v_Position;
   varying vec3 v_Normal;
 
   void main() {
-		vec4 vertPos = u_ModelMatrix * a_Position;
+		vec4 vertPos = u_ModelMatrix2 * a_Position2;
 		v_Position = vec3(vertPos) / vertPos.w;
-		// TODO: Use u_NormalMatrix
+		// TODO: Use u_NormalMatrix2
 		//  Currently causes lambertian & specular to be < 0
-		v_Normal = vec3(u_ModelMatrix * vec4(a_Normal, 0.0));
-    gl_Position = u_ModelMatrix * a_Position;
+		v_Normal = vec3(u_ModelMatrix2 * vec4(a_Normal2, 0.0));
+    gl_Position = u_ProjectionMatrix2 * vertPos;
 
-    a_Color;
-    u_MvpMatrix;
-		a_Normal;
-		u_NormalMatrix;
+    a_Color2;
+    u_ProjectionMatrix2;
+		a_Normal2;
+		u_NormalMatrix2;
   }`;
 
 	this.FRAG_SRC = `
@@ -835,19 +828,19 @@ function VBObox2() {
    };
 
   // UNIFORMS
-  uniform LampT u_LampSet[1]; // Array of all light sources
-  uniform MatlT u_MatlSet[1]; // Array of all materials
+  uniform LampT u_LampSet2[1]; // Array of all light sources
+  uniform MatlT u_MatlSet2[1]; // Array of all materials
   uniform vec3 u_eyePosWorld; // Camera/eye location in world coords
 	uniform int u_useBlinnPhong; // Toggel Phong/Blinn-Phong lighting
 
   // VARYING
   varying vec3 v_Normal;   // Find 3D surface normal at each pix
   varying vec3 v_Position; // pixel's 3D pos too -- in 'world' coords
-  varying vec3 v_Colr;     // Find diffuse reflectance K_d per pix
+  varying vec3 v_Color;     // Find diffuse reflectance K_d per pix
 
   void main() {
     vec3 normal = normalize(v_Normal);
-    vec3 lightDirection = normalize(u_LampSet[0].pos - v_Position);
+    vec3 lightDirection = normalize(u_LampSet2[0].pos - v_Position);
 
 		float lambertian = max(dot(normal, lightDirection), 0.0);
 		float specular = 0.0;
@@ -856,19 +849,19 @@ function VBObox2() {
 				vec3 V = normalize(-v_Position);
 				vec3 H = (lightDirection + V) / length(lightDirection + V);
 				float specAngle = max(dot(normal, H), 0.0);
-				specular = pow(specAngle, float(u_MatlSet[0].shiny));
+				specular = pow(specAngle, float(u_MatlSet2[0].shiny));
 			} else {
 				vec3 R = reflect(-lightDirection, normal);
 				vec3 V = normalize(-v_Position);
 				float specAngle = max(dot(R, V), 0.0);
-				specular = pow(specAngle, float(u_MatlSet[0].shiny));
+				specular = pow(specAngle, float(u_MatlSet2[0].shiny));
 			}
 		}
 
 		gl_FragColor = vec4(
-			u_MatlSet[0].ambi * u_LampSet[0].ambi +
-			u_MatlSet[0].diff * u_LampSet[0].diff * lambertian +
-			u_MatlSet[0].spec * specular * u_LampSet[0].spec,
+			u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
+			u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
+			u_MatlSet2[0].spec * u_LampSet2[0].spec * specular,
 			1.0
 		);
 
@@ -923,13 +916,13 @@ function VBObox2() {
 
 	            //---------------------- Uniform locations &values in our shaders
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
-	this.uLoc_ModelMatrix;						// GPU location for u_ModelMat uniform
+	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
 
   // ------ Additions ------
   this.eyePosWorld = new Float32Array(3); //x,y,z in world coords
   this.u_eyePosWorldLoc; // GPU location for u_ModelMat uniform
-  this.MvpMatrix = new Matrix4(); //Model-view-projection matrix
-  this.u_MvpMatrixLoc;
+  this.ProjectionMatrix = new Matrix4(); //Model-view-projection matrix
+  this.u_ProjectionMatrixLoc;
   this.NormalMatrix = new Matrix4(); //Transformation matrix for normals
   this.u_NormalMatrixLoc;
 	this.u_useBlinnPhongLoc;
@@ -975,44 +968,44 @@ VBObox2.prototype.init = function() {
   // c1) Find All Attributes:---------------------------------------------------
   //  Find & save the GPU location of all our shaders' attribute-variables and
   //  uniform-variables (for switchToMe(), adjust(), draw(), reload(),etc.)
-  this.a_PositionLoc = gl.getAttribLocation(this.shaderLoc, 'a_Position');
-  if(this.a_PositionLoc < 0) {
+  this.a_PositionLoc = gl.getAttribLocation(this.shaderLoc, 'a_Position2');
+  if (this.a_PositionLoc < 0) {
     console.log(this.constructor.name +
     						'.init() Failed to get GPU location of attribute a_Position');
     return -1;	// error exit.
   }
- 	this.a_ColorLoc = gl.getAttribLocation(this.shaderLoc, 'a_Color');
-  if(this.a_ColorLoc < 0) {
+ 	this.a_ColorLoc = gl.getAttribLocation(this.shaderLoc, 'a_Color2');
+  if (this.a_ColorLoc < 0) {
     console.log(this.constructor.name +
     						'.init() failed to get the GPU location of attribute a_Color');
     return -1;	// error exit.
   }
-  this.a_NormalLoc = gl.getAttribLocation(this.shaderLoc, 'a_Normal');
-  if(this.a_Normal < 0) {
+  this.a_NormalLoc = gl.getAttribLocation(this.shaderLoc, 'a_Normal2');
+  if (this.a_Normal < 0) {
     console.log(this.constructor.name +
 	    					'.init() failed to get the GPU location of attribute a_Normal');
 	  return -1;	// error exit.
   }
   // c2) Find All Uniforms:-----------------------------------------------------
   //Get GPU storage location for each uniform var used in our shader programs:
-  this.uLoc_ModelMatrix = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix');
-  if (!this.uLoc_ModelMatrix) {
+  this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix2');
+  if (!this.u_ModelMatrixLoc) {
     console.log(this.constructor.name +
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
   }
 
-   this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix');
+   this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix2');
   if (!this.u_NormalMatrixLoc) {
     console.log(this.constructor.name +
                 '.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
   }
 
-  this.u_MvpMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_MvpMatrix');
-  if (!this.u_MvpMatrixLoc) {
+  this.u_ProjectionMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ProjectionMatrix2');
+  if (!this.u_ProjectionMatrixLoc) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_MvpMatrix uniform');
+                '.init() failed to get GPU location for u_ProjectionMatrix uniform');
     return;
   }
 
@@ -1023,21 +1016,21 @@ VBObox2.prototype.init = function() {
     return;
   }
 
-  this.lamp0.u_pos  = gl.getUniformLocation(gl.program, 'u_LampSet[0].pos');
-  this.lamp0.u_ambi = gl.getUniformLocation(gl.program, 'u_LampSet[0].ambi');
-  this.lamp0.u_diff = gl.getUniformLocation(gl.program, 'u_LampSet[0].diff');
-  this.lamp0.u_spec = gl.getUniformLocation(gl.program, 'u_LampSet[0].spec');
+  this.lamp0.u_pos  = gl.getUniformLocation(gl.program, 'u_LampSet2[0].pos');
+  this.lamp0.u_ambi = gl.getUniformLocation(gl.program, 'u_LampSet2[0].ambi');
+  this.lamp0.u_diff = gl.getUniformLocation(gl.program, 'u_LampSet2[0].diff');
+  this.lamp0.u_spec = gl.getUniformLocation(gl.program, 'u_LampSet2[0].spec');
   if( !this.lamp0.u_pos || !this.lamp0.u_ambi || !this.lamp0.u_diff || !this.lamp0.u_spec ) {
     console.log('Failed to get GPUs Lamp0 storage locations');
    return;
   }
 
   // ... for Phong material/reflectance:
-  this.matl0.uLoc_Ke = gl.getUniformLocation(gl.program, 'u_MatlSet[0].emit');
-  this.matl0.uLoc_Ka = gl.getUniformLocation(gl.program, 'u_MatlSet[0].ambi');
-  this.matl0.uLoc_Kd = gl.getUniformLocation(gl.program, 'u_MatlSet[0].diff');
-  this.matl0.uLoc_Ks = gl.getUniformLocation(gl.program, 'u_MatlSet[0].spec');
-  this.matl0.uLoc_Kshiny = gl.getUniformLocation(gl.program, 'u_MatlSet[0].shiny');
+  this.matl0.uLoc_Ke = gl.getUniformLocation(gl.program, 'u_MatlSet2[0].emit');
+  this.matl0.uLoc_Ka = gl.getUniformLocation(gl.program, 'u_MatlSet2[0].ambi');
+  this.matl0.uLoc_Kd = gl.getUniformLocation(gl.program, 'u_MatlSet2[0].diff');
+  this.matl0.uLoc_Ks = gl.getUniformLocation(gl.program, 'u_MatlSet2[0].spec');
+  this.matl0.uLoc_Kshiny = gl.getUniformLocation(gl.program, 'u_MatlSet2[0].shiny');
   if(!this.matl0.uLoc_Ke || !this.matl0.uLoc_Ka || !this.matl0.uLoc_Kd
                     || !this.matl0.uLoc_Ks || !this.matl0.uLoc_Kshiny
      ) {
@@ -1153,10 +1146,26 @@ VBObox2.prototype.adjust = function() {
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
 
+	{
+	  //---------------For the light source(s):
+	  gl.uniform3fv(this.lamp0.u_pos,  this.lamp0.I_pos.elements.slice(0,3));
+	  gl.uniform3fv(this.lamp0.u_ambi, this.lamp0.I_ambi.elements);   // ambient
+	  gl.uniform3fv(this.lamp0.u_diff, this.lamp0.I_diff.elements);   // diffuse
+	  gl.uniform3fv(this.lamp0.u_spec, this.lamp0.I_spec.elements);   // Specular
+
+	  //---------------For the Material object(s):
+	  gl.uniform3fv(this.matl0.uLoc_Ke, this.matl0.K_emit.slice(0,3));        // Ke emissive
+	  gl.uniform3fv(this.matl0.uLoc_Ka, this.matl0.K_ambi.slice(0,3));        // Ka ambient
+	  gl.uniform3fv(this.matl0.uLoc_Kd, this.matl0.K_diff.slice(0,3));        // Kd diffuse
+	  gl.uniform3fv(this.matl0.uLoc_Ks, this.matl0.K_spec.slice(0,3));        // Ks specular
+	  gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny
+	  //  == specular exponent; (parseInt() converts from float to base-10 integer).
+	}
+
 	//----------------For the Matrices: find the model matrix:
   // Calculate the view projection matrix
-  this.ModelMatrix.setPerspective(30 * aspect, aspect, 1, 100);
-  this.ModelMatrix.lookAt(
+  this.ProjectionMatrix.setPerspective(30 * aspect, aspect, 1, 100);
+  this.ProjectionMatrix.lookAt(
 		g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
 		g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
 		g_perspective_up[0], g_perspective_up[1], g_perspective_up[2]
@@ -1164,21 +1173,12 @@ VBObox2.prototype.adjust = function() {
     // 0, 0, 0,
     // 0, 0, 1
 	);
-
-	this.ModelMatrix.translate(0, 0, 0);
-  this.ModelMatrix.scale(0.8, 0.8, 0.8);
-  this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
-  // this.MvpMatrix.multiply(this.ModelMatrix);
-
-  this.NormalMatrix.setInverseOf(this.ModelMatrix);
-  this.NormalMatrix.transpose();
-
-  // Send the new matrix values to their locations in the GPU:
-  gl.uniformMatrix4fv(this.uLoc_ModelMatrix, false, this.ModelMatrix.elements);
-  gl.uniformMatrix4fv(this.uLoc_MvpMatrix, false, this.MvpMatrix.elements);
-  gl.uniformMatrix4fv(this.uLoc_NormalMatrix, false, this.NormalMatrix.elements);
+  // gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
+
+	u_ModelMatrixLoc = this.u_ModelMatrixLoc;
+	u_NormalMatrixLoc = this.u_NormalMatrixLoc;
   this.reload();
 }
 
@@ -1190,26 +1190,7 @@ VBObox2.prototype.draw = function() {
   						'.draw() call you needed to call this.switchToMe()!!');
   }
 
- 	// Send fresh 'uniform' values to the GPU:
-
-  //---------------For the light source(s):
-  gl.uniform3fv(this.lamp0.u_pos,  this.lamp0.I_pos.elements.slice(0,3));
-  gl.uniform3fv(this.lamp0.u_ambi, this.lamp0.I_ambi.elements);   // ambient
-  gl.uniform3fv(this.lamp0.u_diff, this.lamp0.I_diff.elements);   // diffuse
-  gl.uniform3fv(this.lamp0.u_spec, this.lamp0.I_spec.elements);   // Specular
-
-  //---------------For the Material object(s):
-  gl.uniform3fv(this.matl0.uLoc_Ke, this.matl0.K_emit.slice(0,3));        // Ke emissive
-  gl.uniform3fv(this.matl0.uLoc_Ka, this.matl0.K_ambi.slice(0,3));        // Ka ambient
-  gl.uniform3fv(this.matl0.uLoc_Kd, this.matl0.K_diff.slice(0,3));        // Kd diffuse
-  gl.uniform3fv(this.matl0.uLoc_Ks, this.matl0.K_spec.slice(0,3));        // Ks specular
-  gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny
-  //  == specular exponent; (parseInt() converts from float to base-10 integer).
-
-  // ----------------------------Draw the contents of the currently-bound VBO:
-  ModelMatrix = this.ModelMatrix;
-  this.vboVerts = vertexCount;
-  //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
+  draw();
 }
 
 VBObox2.prototype.reload = function() {
@@ -1224,7 +1205,7 @@ VBObox2.prototype.reload = function() {
  					 				this.vboContents);   // the JS source-data array used to fill VBO
 }
 
-function appendPositions(arr){
+function appendPositions(arr) {
   positions = Float32Edit(positions,arr,ipos);
   ipos += arr.length;
   if(ipos > numVertices*posDimensions){
@@ -1233,7 +1214,7 @@ function appendPositions(arr){
   }
 }
 
-function appendColors(arr){
+function appendColors(arr) {
   float_colors = Float32Edit(float_colors,arr,icolors);
   icolors += arr.length;
   if(icolors > numVertices*colorsDimensions){
@@ -1242,7 +1223,7 @@ function appendColors(arr){
   }
 }
 
-function appendNormals(arr){
+function appendNormals(arr) {
   normals = Float32Edit(normals,arr,inorms);
   inorms += arr.length;
   if(inorms > numVertices*normalsDimensions){
@@ -1252,7 +1233,7 @@ function appendNormals(arr){
 }
 
 // Concatenate two Float32Arrays
-function Float32Concat(first, second){
+function Float32Concat(first, second) {
   var firstLength = first.length,
   result = new Float32Array(firstLength + second.length);
 
@@ -1263,7 +1244,7 @@ function Float32Concat(first, second){
 }
 
 // Overwrite the base Float32Array with a smaller 'edit' Float32Array starting at some index
-function Float32Edit(base,edit,startIdx){
+function Float32Edit(base, edit, startIdx) {
   for(var i = 0; i < edit.length;i++){
     base[i+startIdx] = edit[i];
   }
@@ -1275,7 +1256,7 @@ function lerp(a, b, l) {
 }
 
 // Concatenate all attributes into a single array
-function CreateVBO(){
+function CreateVBO() {
 
   //-------Vertices---------
           // X Y Z W | Position (4)
@@ -1285,6 +1266,10 @@ function CreateVBO(){
   vertexCount = initVBO();  //From IoccoVittorio_ProC.js
 }
 
-function updateModelMatrix(matrix){
+function updateModelMatrix(matrix) {
+	if (!u_ModelMatrixLoc || !u_NormalMatrixLoc) {
+		console.log("Oh no :(");
+	}
   gl.uniformMatrix4fv(u_ModelMatrixLoc, false, matrix.elements);
+  gl.uniformMatrix4fv(u_NormalMatrixLoc, false, matrix.invert().transpose().elements);
 }

@@ -433,25 +433,25 @@ function initVBO() {
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
 
-  // Lilypad Circle: {start: 1384 + gndverts.length, len: (8.5 * 2) + 2}
+  // Lilypad Circle: {start: 1384 + gndverts.length, len: (g_step * 2) + 2}
+  lilyStart = pos.length / 4;
+  lilyLen = (g_step * 2) + 2;
   pos.push(0, 0, 0, 1);
-  lilyStart = 1384;
-  lilyLen = (8.5*2)+3;
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
   norms.push(0, 0, 1);
-  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/8.5); theta += Math.PI/8.5) {
+  for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
-    colors.push(20/255, (theta+110)/255.0, 10/255);
+    colors.push(20/255, (theta+110)/255, 10/255);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
-  pos.push(.3,1,.7,1);
-  pos.push(-.3,1,.7,1);
-  pos.push(0,0,0,1);
-  pos.push(.3,1,.4,1);
-  pos.push(-.3,1,.4,1);
-  pos.push(0,0,0,1);
+  pos.push(.3, 1, .7, 1);
+  pos.push(-.3, 1, .7, 1);
+  pos.push(0, 0, 0, 1);
+  pos.push(.3, 1, .4, 1);
+  pos.push(-.3, 1, .4, 1);
+  pos.push(0, 0, 0, 1);
 
   colors.push(127/255,0/255,43/255);
   colors.push(255/255,20/255,147/255);
@@ -460,12 +460,12 @@ function initVBO() {
   colors.push(255/255,20/255,147/255);
   colors.push(255/255,192/255,203/255);
 
-  norms.push(.3,1,.7);
-  norms.push(-.3,1,.7);
-  norms.push(0,0,0);
-  norms.push(.3,1,.4);
-  norms.push(-.3,1,.4);
-  norms.push(0,0,0);
+  norms.push(.3, 1, .7);
+  norms.push(-.3, 1, .7);
+  norms.push(0, 0, 0);
+  norms.push(.3, 1, .4);
+  norms.push(-.3, 1, .4);
+  norms.push(0, 0, 1);
 
   // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;
@@ -628,9 +628,9 @@ function draw() {
   for (var i = 0; i < log_count; i++) {
     drawLogs(g_logs[i][0], g_logs[i][1], g_logs[i][2], g_logs[i][3]);
   }
-  for (var i = 0; i < dragonfly_count; i++) {
-    drawDragonfly(i);
-  }
+  // for (var i = 0; i < dragonfly_count; i++) {
+  //   drawDragonfly(i);
+  // }
   for (var i = 0; i < cattail_count; i++) {
     drawCattail(g_cattails[i][0], g_cattails[i][1], g_cattails[i][2], g_cattails[i][3]);
   }
@@ -682,9 +682,9 @@ function drawCattailHead(c_sway) {
   ModelMatrix.scale(0.01, 0.01, 0.25); // w, d, h
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_FAN, (g_step * 6) + 4, (g_step * 2) + 2);
-  ModelMatrix.rotate(180, 1, 0, 0);
-  updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_FAN, (g_step * 6) + 5, (g_step * 2) + 2);
+  // ModelMatrix.rotate(180, 1, 0, 0);
+  // updateModelMatrix(ModelMatrix);
+  // gl.drawArrays(gl.TRIANGLE_FAN, (g_step * 6) + 5, (g_step * 2) + 2);
 
   // End Group: Tip
   ModelMatrix = popMatrix();
@@ -1046,30 +1046,23 @@ function drawLilyPads(x, y, rot, scale) {
   pushMatrix(ModelMatrix)
   ModelMatrix.translate(x, y, -0.79);
   ModelMatrix.rotate(rot, 0, 0, 1);
-  // ModelMatrix.scale(scale, scale, scale);
-  // ModelMatrix.scale(.2,.2,.2);
+  ModelMatrix.scale(scale, scale, scale);
   pushMatrix(ModelMatrix);
-  // ModelMatrix.scale(.5,.5,.5);
-  //ModelMatrix.translate(0,0,-1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen-1);
-  pushMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen-1);
-  ModelMatrix = popMatrix();
-  updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
-  ModelMatrix.rotate(75,0,0,1);
+  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  ModelMatrix.rotate(75, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
-  ModelMatrix.rotate(70,0,0,1);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
-  ModelMatrix.rotate(70,0,0,1);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
-  ModelMatrix.rotate(70,0,0,1);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix = popMatrix();
 
   //draw LilyPad (underside)
@@ -1077,24 +1070,24 @@ function drawLilyPads(x, y, rot, scale) {
   ModelMatrix.scale(.5,-.5,.5);
   //ModelMatrix.translate(0,0,-1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen-1);
+  // gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
   pushMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen-1);
+  // gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
   ModelMatrix = popMatrix();
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix = popMatrix();
 
   //LILY PAD -- PART 1 (LARGE UNDER)
@@ -1104,19 +1097,19 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-2);
   ModelMatrix.rotate(30,0,0,1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix = popMatrix();
 
   //draw LilyPad (underside)
@@ -1125,18 +1118,18 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-2);
   ModelMatrix.rotate(30,0,0,1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix = popMatrix();
 
   //LILY PAD -- PART 1 (Small)
@@ -1146,25 +1139,25 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-1);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
 
   pushMatrix(ModelMatrix)
   ModelMatrix.scale(.07,.07,.07);
   ModelMatrix.translate(0,0,1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+6, sphereLen3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 6, sphereLen3);
   ModelMatrix = popMatrix();
 
   ModelMatrix = popMatrix();
@@ -1175,18 +1168,18 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-1);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen+3, 3);
+  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix = popMatrix();
   ModelMatrix = popMatrix();
 }
