@@ -977,9 +977,9 @@ function VBObox2() {
 		}
 
 		gl_FragColor = vec4(
-			vec3(1,1,1) * u_LampSet2[0].ambi +
-			vec3(1,1,1) * u_LampSet2[0].diff * lambertian +
-			vec3(1,1,1) * u_LampSet2[0].spec * specular,
+			v_Color2 * u_LampSet2[0].ambi +
+			v_Color2 * u_LampSet2[0].diff * lambertian +
+			v_Color2 * u_LampSet2[0].spec * specular,
 			1.0
 		);
 		// gl_FragColor = vec4(
