@@ -254,7 +254,7 @@ function myKeyDown(kev) {
       var D = [
         g_perspective_lookat[0] - g_perspective_eye[0],
         g_perspective_lookat[1] - g_perspective_eye[1],
-        
+        0
       ];
       // Cross Product
       var C = [
