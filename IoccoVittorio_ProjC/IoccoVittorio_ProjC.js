@@ -1072,7 +1072,7 @@ function drawLilyPads(x, y, rot, scale) {
   //LILY PAD -- PART 1 (LARGE UPPPER)
   //draw LilyPad (top)
   pushMatrix(ModelMatrix)
-  ModelMatrix.translate(x, y, -0.79);
+  ModelMatrix.translate(x, y, -.99);
   ModelMatrix.rotate(rot, 0, 0, 1);
   ModelMatrix.scale(scale, scale, scale);
   updateModelMatrix(ModelMatrix);

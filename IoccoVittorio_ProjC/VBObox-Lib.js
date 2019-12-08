@@ -409,7 +409,7 @@ VBObox0.prototype.adjust = function() {
   );
 
 	this.ModelMat.scale(1 * aspect, 1, 1);
-  this.ModelMat.translate(0, 0, -0.8);
+  this.ModelMat.translate(0, 0, -1.0);
   //  Transfer new uniforms' values to the GPU:-------------
   // Send  new 'ModelMat' values to the GPU's 'u_ModelMat1' uniform:
   gl.uniformMatrix4fv(this.u_ModelMatLoc,	// GPU location of the uniform
@@ -428,7 +428,6 @@ VBObox0.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
-  this.ModelMat.translate(0,0,-.2);
   gl.uniformMatrix4fv(this.u_ModelMatLoc, false, this.ModelMat.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   gl.drawArrays(gl.LINES, 	    // select the drawing primitive to draw,
@@ -522,16 +521,33 @@ function VBObox1() {
 									 (Kd_FreeLight * lambertian * a_Color1) +
 								   Ks_FreeLight * specular * specularColor) * vec3(freeLightOn,freeLightOn,freeLightOn);
 
-    //=if (specular == 0.0) {
-     // v_Color1 = vec3(1.0,1.0,1.0);
-    //}
 
+    L = normalize(headLightPos - v_VertPos);
+    // Lambert stuff
+    lambertian = max(dot(N, L), 0.0);
+    specular = 0.0;
+    if (lambertian > 0.0) {
+      if (u_useBlinnPhong == 1) {
+        vec3 V = normalize(-v_VertPos);
+        vec3 H = (L + V) / length(L + V);
+        float specAngle = max(dot(N, H), 0.0);
+        specular = pow(specAngle, shininess);
+      } else {
+        vec3 R = reflect(-L, N);
+        vec3 V = normalize(-v_VertPos);
+        float specAngle = max(dot(R, V), 0.0);
+        specular = pow(specAngle, shininess);
+      }
+    }
+
+    v_Color1 += vec3(Kd * lambertian * a_Color1 + 
+                     Ks * specular * specularColor) * vec3(headLightOn,headLightOn,headLightOn);
+ 
 		// Testing defaults
 		// v_Color1 = a_Color1;
 		// gl_Position = u_ModelMatrix1 * a_Pos1;
 		// u_ProjectionMatrix1; a_Normal1; u_NormalMatrix1;
-    headLightPos;
-    headLightOn;
+    //headLightOn;
   }`;
 
 	this.FRAG_SRC = `
@@ -836,7 +852,7 @@ VBObox1.prototype.draw = function() {
   this.Ks_FreeLight = [tracker.freelight_palette.specular[0]/255.0, tracker.freelight_palette.specular[1]/255.0, tracker.freelight_palette.specular[2]/255.0];
 
   this.freeLightOn = tracker.freelight;
-  this.headLightOn = tracker.headLight;
+  this.headLightOn = tracker.headlight;
 
   gl.uniform3fv(this.u_lightPos, this.lightPos.elements);
   gl.uniform3fv(this.u_headLightPos, this.headLightPos.elements);
@@ -1277,7 +1293,7 @@ VBObox2.prototype.adjust = function() {
     // 0, 0, 0,
     // 0, 0, 1
 	);
-  // gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
+  //gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
 
@@ -1372,7 +1388,7 @@ function CreateVBO() {
 
 function updateModelMatrix(matrix) {
 	if (!u_ModelMatrixLoc || !u_NormalMatrixLoc) {
-		console.log("Oh no :(");
+		//console.log("Oh no :(");
 	}
   gl.uniformMatrix4fv(u_ModelMatrixLoc, false, matrix.elements);
 	NormalMatrix.setInverseOf(matrix);
