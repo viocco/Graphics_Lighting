@@ -194,7 +194,7 @@ function initVBO() {
   /* CONE */
   // Tip: {start: (g_step * 6) + 4, len: 1}
   pos.push(0, 0, 1, 1);
-  colors.push(19.0/255.0, 120.0/255.0, 46.0/255.0, 1);
+  colors.push(19.0/255.0, 120.0/255.0, 46.0/255.0);
   norms.push(0, 0, 1);
   // Circumfrence: {start: (g_step * 6) + 5, len: (g_step * 2) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
@@ -205,6 +205,8 @@ function initVBO() {
 
   // Green Tube: {start: (g_step * 8) + 7, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
+    console.log(pos.length/4);
+    console.log(colors.length/3);
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);

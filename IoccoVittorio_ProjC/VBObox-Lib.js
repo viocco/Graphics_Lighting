@@ -427,7 +427,8 @@ VBObox0.prototype.draw = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.draw() call you needed to call this.switchToMe()!!');
   }
-
+  this.ModelMat.translate(0,0,-.2);
+  gl.uniformMatrix4fv(this.u_ModelMatLoc, false, this.ModelMat.elements);
   // ----------------------------Draw the contents of the currently-bound VBO:
   gl.drawArrays(gl.LINES, 	    // select the drawing primitive to draw,
                   // choices: gl.POINTS, gl.LINES, gl.LINE_STRIP, gl.LINE_LOOP,
@@ -482,7 +483,7 @@ function VBObox1() {
 	vec3 ambientColor = vec3(0.2, 0.1, 0.0);
 	vec3 diffuseColor = vec3(1.0, 0.0, 0.0);
 	vec3 specularColor = vec3(1.0, 1.0, 1.0);
-	vec3 lightPos = vec3(1.0, 1.0, -1.0);
+	uniform vec3 lightPos;
 
   void main() {
     vec4 vertPos = u_ModelMatrix * a_Pos1;
@@ -570,6 +571,9 @@ function VBObox1() {
 	this.u_ProjectionMatrixLoc;
 	this.u_NormalMatrixLoc;
 	this.u_useBlinnPhongLoc;
+  this.lightPos = new Vector3();
+  this.u_lightPos;
+
 };
 
 VBObox1.prototype.init = function() {
@@ -629,6 +633,12 @@ VBObox1.prototype.init = function() {
     return;
   }
 
+  this.u_lightPos = gl.getUniformLocation(this.shaderLoc, 'lightPos');
+  if (!this.u_lightPos) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_NormalMatrix uniform');
+    return;
+  }
 
 	// Blinn-Phong switch
 	this.u_useBlinnPhongLoc = gl.getUniformLocation(gl.program, 'u_useBlinnPhong');
@@ -637,6 +647,9 @@ VBObox1.prototype.init = function() {
                 '.init() failed to get GPU location for u_useBlinnPhong uniform');
     return;
   }
+
+  this.lightPos.elements.set([1.0, 1.0, 1.0]);
+
 }
 
 VBObox1.prototype.switchToMe = function () {
@@ -746,6 +759,10 @@ VBObox1.prototype.adjust = function() {
 VBObox1.prototype.draw = function() {
 //=============================================================================
 // Send commands to GPU to select and render current VBObox contents.
+
+  this.lightPos.elements.set([tracker.freelight_pos_x, tracker.freelight_pos_y, tracker.freelight_pos_z]);
+  gl.uniform3fv(this.u_lightPos,  this.lightPos.elements);
+
 
   // check: was WebGL context set to use our VBO & shader program?
   if(this.isReady()==false) {
@@ -1077,7 +1094,7 @@ VBObox2.prototype.switchToMe = function() {
 //  c) tell the GPU to connect the shader program's attributes to that VBO.
 
 // a) select our shader program:
-  gl.useProgram(this.shaderLoc);
+gl.useProgram(this.shaderLoc);
 //		Each call to useProgram() selects a shader program from the GPU memory,
 // but that's all -- it does nothing else!  Any previously used shader program's
 // connections to attributes and uniforms are now invalid, and thus we must now
@@ -1165,7 +1182,6 @@ VBObox2.prototype.adjust = function() {
     // 0, 0, 0,
     // 0, 0, 1
 	);
-
 	this.ModelMatrix.translate(0, 0, 0);
   this.ModelMatrix.scale(0.8, 0.8, 0.8);
   this.ModelMatrix.rotate(g_angleNow0, 0, 0, 1);
@@ -1210,6 +1226,7 @@ VBObox2.prototype.draw = function() {
   // ----------------------------Draw the contents of the currently-bound VBO:
   ModelMatrix = this.ModelMatrix;
   this.vboVerts = vertexCount;
+  draw();
   //gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vboVerts);
 }
 
