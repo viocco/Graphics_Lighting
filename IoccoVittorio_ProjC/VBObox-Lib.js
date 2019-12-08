@@ -464,6 +464,13 @@ function VBObox1() {
   uniform mat4 u_ModelMatrix1;
 	uniform mat4 u_NormalMatrix1;
 	uniform int u_useBlinnPhong;
+  uniform vec3 freeLightPos;
+  uniform int freeLightOn;
+  uniform vec3 headLightPos;
+  uniform int headLightOn;
+  uniform vec3 Ka_FreeLight;
+  uniform vec3 Kd_FreeLight;
+  uniform vec3 Ks_FreeLight;
 
 	// Attributes
 	attribute vec4 a_Pos1;
@@ -480,11 +487,11 @@ function VBObox1() {
 	float Kd = 1.0; // Diffuse reflection coefficient
 	float Ks = 1.0; // Specular reflection coefficient
 	float shininess = 80.0;
-	// Material color
+	
+  // Material color
 	vec3 ambientColor = vec3(0.2, 0.1, 0.0);
 	vec3 diffuseColor = vec3(1.0, 0.0, 0.0);
 	vec3 specularColor = vec3(1.0, 1.0, 1.0);
-	uniform vec3 lightPos;
 
   void main() {
     vec4 vertPos = u_ModelMatrix1 * a_Pos1;
@@ -493,7 +500,7 @@ function VBObox1() {
 		gl_Position = u_ProjectionMatrix1 * vertPos;
 
 		vec3 N = normalize(v_NormalInterp);
-		vec3 L = normalize(lightPos - v_VertPos);
+		vec3 L = normalize(freeLightPos - v_VertPos);
 		// Lambert stuff
 		float lambertian = max(dot(N, L), 0.0);
 		float specular = 0.0;
@@ -511,14 +518,20 @@ function VBObox1() {
 			}
 		}
 
-  	v_Color1 = vec3(Ka * a_Color1 * 0.15 +
-									 Kd * lambertian * a_Color1 +
-								   Ks * specular * specularColor);
+  	v_Color1 = vec3(Ka_FreeLight * a_Color1 * 0.15 +
+									 (Kd_FreeLight * lambertian * a_Color1) +
+								   Ks_FreeLight * specular * specularColor) * vec3(freeLightOn,freeLightOn,freeLightOn);
+
+    //=if (specular == 0.0) {
+     // v_Color1 = vec3(1.0,1.0,1.0);
+    //}
 
 		// Testing defaults
 		// v_Color1 = a_Color1;
 		// gl_Position = u_ModelMatrix1 * a_Pos1;
 		// u_ProjectionMatrix1; a_Normal1; u_NormalMatrix1;
+    headLightPos;
+    headLightOn;
   }`;
 
 	this.FRAG_SRC = `
@@ -571,8 +584,26 @@ function VBObox1() {
 	this.u_ProjectionMatrixLoc;
 	this.u_NormalMatrixLoc;
 	this.u_useBlinnPhongLoc;
+
+  //Initialize Light
   this.lightPos = new Vector3();
   this.u_lightPos;
+  this.headLightPos = new Vector3();
+  this.u_headLightPos;
+
+  //Initialize LightOn Var
+  this.freeLightOn = 1;
+  this.u_freeLightOn;
+  this.headLightOn = 1;
+  this.u_headLightOn;
+
+  this.Ka_FreeLight = tracker.freelight_palette.ambient;
+  this.Kd_FreeLight = tracker.freelight_palette.diffuse;
+  this.Ks_FreeLight = tracker.freelight_palette.specular;
+  this.u_Ka_FreeLight;
+  this.u_Kd_FreeLight;
+  this.u_Ks_FreeLight;
+
 
 };
 
@@ -633,10 +664,52 @@ VBObox1.prototype.init = function() {
     return;
   }
 
-  this.u_lightPos = gl.getUniformLocation(this.shaderLoc, 'lightPos');
+  this.u_lightPos = gl.getUniformLocation(this.shaderLoc, 'freeLightPos');
   if (!this.u_lightPos) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_lightPos uniform');
+    return;
+  }
+
+  this.u_freeLightOn = gl.getUniformLocation(this.shaderLoc, 'freeLightOn');
+  if (!this.u_freeLightOn) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_freeLightOn uniform');
+    return;
+  }
+
+  this.u_Ka_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Ka_FreeLight');
+  if (!this.u_Ka_FreeLight) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_Ka_FreeLight uniform');
+    return;
+  }
+  
+  this.u_Kd_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Kd_FreeLight');
+  if (!this.u_Kd_FreeLight) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_Kd_FreeLight uniform');
+    return;
+  }
+  
+  this.u_Ks_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Ks_FreeLight');
+  if (!this.u_Ks_FreeLight) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_Ks_FreeLight uniform');
+    return;
+  }
+
+  this.u_headLightPos = gl.getUniformLocation(this.shaderLoc, 'headLightPos');
+  if (!this.u_headLightPos) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_headLightPos uniform');
+    return;
+  }
+
+  this.u_headLightOn = gl.getUniformLocation(this.shaderLoc, 'headLightOn');
+  if (!this.u_headLightOn) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_headLightOn uniform');
     return;
   }
 
@@ -757,7 +830,21 @@ VBObox1.prototype.draw = function() {
 // Send commands to GPU to select and render current VBObox contents.
 
   this.lightPos.elements.set([tracker.freelight_pos_x, tracker.freelight_pos_y, tracker.freelight_pos_z]);
-  gl.uniform3fv(this.u_lightPos,  this.lightPos.elements);
+  this.headLightPos.elements.set([g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2]]);
+  this.Ka_FreeLight = [tracker.freelight_palette.ambient[0]/255.0, tracker.freelight_palette.ambient[1]/255.0, tracker.freelight_palette.ambient[2]/255.0];
+  this.Kd_FreeLight = [tracker.freelight_palette.diffuse[0]/255.0, tracker.freelight_palette.diffuse[1]/255.0, tracker.freelight_palette.diffuse[2]/255.0];
+  this.Ks_FreeLight = [tracker.freelight_palette.specular[0]/255.0, tracker.freelight_palette.specular[1]/255.0, tracker.freelight_palette.specular[2]/255.0];
+
+  this.freeLightOn = tracker.freelight;
+  this.headLightOn = tracker.headLight;
+
+  gl.uniform3fv(this.u_lightPos, this.lightPos.elements);
+  gl.uniform3fv(this.u_headLightPos, this.headLightPos.elements);
+  gl.uniform1i(this.u_freeLightOn, this.freeLightOn);
+  gl.uniform1i(this.u_headLightOn, this.headLightOn);
+  gl.uniform3fv(this.u_Ka_FreeLight, this.Ka_FreeLight);
+  gl.uniform3fv(this.u_Kd_FreeLight, this.Kd_FreeLight);
+  gl.uniform3fv(this.u_Ks_FreeLight, this.Ks_FreeLight);
 
 
   // check: was WebGL context set to use our VBO & shader program?
