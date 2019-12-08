@@ -1373,5 +1373,7 @@ function updateModelMatrix(matrix) {
 		console.log("Oh no :(");
 	}
   gl.uniformMatrix4fv(u_ModelMatrixLoc, false, matrix.elements);
-  gl.uniformMatrix4fv(u_NormalMatrixLoc, false, matrix.invert().transpose().elements);
+	NormalMatrix.setInverseOf(matrix);
+	NormalMatrix.transpose();
+  gl.uniformMatrix4fv(u_NormalMatrixLoc, false, NormalMatrix.elements);
 }

@@ -18,6 +18,7 @@ var g_aspect = window.innerHeight / window.innerWidth;
 
 // Transformation vars
 var ModelMatrix = new Matrix4();
+var NormalMatrix = new Matrix4();
 var g_step = 8.0; // [4, +inf]
 var wing_start;
 var sphereStart;
@@ -174,11 +175,11 @@ function initVBO() {
   // Circle: {start: 0, len: (g_step * 2) + 2}
   pos.push(0, 0, 0, 1);
   colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-  norms.push(0, 0, 0);
+  norms.push(0, 0, 1);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(0, 0, 1);
   }
 
   // Brown Tube: {start: (g_step * 2) + 2, len: (g_step * 4) + 2}
@@ -186,7 +187,7 @@ function initVBO() {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
     colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
-    colors.push(188.0/255.0, 119.0/255.0, 69.0/255.0);
+    colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
     norms.push(Math.cos(theta), Math.sin(theta), 1);
   }
@@ -200,19 +201,17 @@ function initVBO() {
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(Math.cos(theta), Math.sin(theta), Math.sqrt(2) / 2);
   }
 
   // Green Tube: {start: (g_step * 8) + 7, len: (g_step * 4) + 2}
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
-    console.log(pos.length/4);
-    console.log(colors.length/3);
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     pos.push(Math.cos(theta), Math.sin(theta), 1, 1);
     colors.push(13.0/255.0, 173.0/255.0, 10.0/255.0);
     colors.push(16.0/255.0, 163.0/255.0, 55.0/255.0);
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-    norms.push(Math.cos(theta), Math.sin(theta), 1);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
 
   /* Order of push:
@@ -364,11 +363,11 @@ function initVBO() {
   // Circle: {start: 188, len: (g_step * 2) + 2}
   pos.push(0, 0, 0, 1);
   colors.push(.03, .13, .29);
-  norms.push(0, 0, 0);
+  norms.push(0, 1, 0);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
     colors.push(.03, .25, .68);
-    norms.push(Math.cos(theta), 0, Math.sin(theta));
+    norms.push(0, 1, 0);
   }
 
   // Brown Tube: {start: 206, len: (g_step * 4) + 2}
@@ -378,7 +377,7 @@ function initVBO() {
     colors.push(.03, .13, (theta - .9 * theta) % 255);
     colors.push(.03, (.13 * theta) % 255, (theta - .7 * theta) % 255);
     norms.push(Math.cos(theta), 0, Math.sin(theta));
-    norms.push(Math.cos(theta), 1, Math.sin(theta));
+    norms.push(Math.cos(theta), 0, Math.sin(theta));
   }
 
   // Cone Tip: {start: (g_step * 6) + 4, len: 1}
@@ -390,7 +389,7 @@ function initVBO() {
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), 0, Math.sin(theta), 1);
     colors.push(.03, .13, .29);
-    norms.push(Math.cos(theta), 0, Math.sin(theta));
+    norms.push(Math.cos(theta), Math.sqrt(2) / 2, Math.sin(theta));
   }
 
   // Head cube: {start: (g_step * 8) + 7, len: 9}
@@ -412,11 +411,27 @@ function initVBO() {
              1, 0, 1, 1,
              0, 0, 0, 1,
              0, 0, 1, 1);
+  norms.push(-1, 1, 1,
+             -1,-1, 1,
+              1, 1, 1,
+              1,-1, 1,
+              1, 1,-1,
+              1,-1,-1,
+             -1, 1,-1,
+             -1,-1,-1,
+             -1, 1, 1,
+             -1,-1, 1,
+             -1, 1, 1,
+              1, 1, 1,
+             -1, 1,-1,
+              1, 1,-1,
+              1,-1,-1,
+              1,-1, 1,
+             -1,-1,-1,
+             -1,-1, 1,);
   for (var i = 0; i < 9; i++) {
     colors.push(.03, .13, .29);
     colors.push(.05, .40, .55);
-    norms.push(0, 0, 1);
-    norms.push(0, 0, 1);
   }
 
   // Sphere (brown fade): {start: sphereStart, len: sphereLen}
@@ -427,7 +442,7 @@ function initVBO() {
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
 
-  // Sphere (eyes): {start: sphereStart, len: sphereLen}
+  // Sphere (eyes): {start: sphereStart2, len: sphereLen2}
   sphereVerts = makeSphere2(0, 0, 0);
   sphereStart2 = (pos.length / 4) - 1;
   sphereLen2 = sphereVerts.length / 7;
@@ -435,7 +450,7 @@ function initVBO() {
   colors.push.apply(colors, sphereVerts[1]);
   norms.push.apply(norms, sphereVerts[2]);
 
-  // Lilypad Circle: {start: 1384 + gndverts.length, len: (g_step * 2) + 2}
+  // Lilypad Circle: {start: lilyStart, len: (g_step * 2) + 2}
   lilyStart = pos.length / 4;
   lilyLen = (g_step * 2) + 2;
   pos.push(0, 0, 0, 1);
@@ -444,7 +459,7 @@ function initVBO() {
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/g_step); theta += Math.PI/g_step) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     colors.push(20/255, (theta+110)/255, 10/255);
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(0, 0, 1);
   }
 
   //Lilypad Lily: {start: lilyStart + lilyLen}
@@ -462,12 +477,12 @@ function initVBO() {
   colors.push(255/255,20/255,147/255);
   colors.push(255/255,192/255,203/255);
 
-  norms.push(.3, 1, .7);
-  norms.push(-.3, 1, .7);
-  norms.push(0, 0, 0);
-  norms.push(.3, 1, .4);
-  norms.push(-.3, 1, .4);
-  norms.push(0, 0, 1);
+  norms.push(0, -0.42, 0.6);
+  norms.push(0, -0.42, 0.6);
+  norms.push(0, -0.42, 0.6);
+  norms.push(0, -0.24, 0.6);
+  norms.push(0, -0.24, 0.6);
+  norms.push(0, -0.24, 0.6);
 
   // Sphere Bulb: {start: lilyStart + lilyLen + 6, len: sphereLen3}
   var test = true;
@@ -496,12 +511,12 @@ function initVBO() {
       colors.push(139.0/255.0, 69.0/255.0, 19.0/255.0);
     }
     norms.push(Math.cos(theta), Math.sin(theta), 0);
-    norms.push(Math.cos(theta), Math.sin(theta), 1);
+    norms.push(Math.cos(theta), Math.sin(theta), 0);
   }
   logCap = pos.length / 4;
   pos.push(0, 0, 0, 1);
   colors.push(0.87, 0.52, 0.21);
-  norms.push(0, 0, 0);
+  norms.push(0, 0, 1);
   for (var theta = 0.0; theta < (2.0 * Math.PI) + (Math.PI/logStep); theta += Math.PI/logStep) {
     pos.push(Math.cos(theta), Math.sin(theta), 0, 1);
     var color_randomizer = Math.random();
@@ -510,7 +525,7 @@ function initVBO() {
     } else {
       colors.push(0.87, 0.52, 0.21);
     }
-    norms.push(Math.cos(theta), Math.sin(theta), 0);
+    norms.push(0, 0, 1);
   }
   logEnd = pos.length / 4;
 
@@ -619,7 +634,8 @@ function drawResize() {
 function draw() {
   pushMatrix(ModelMatrix);
 
-  ModelMatrix.setTranslate(0, 0, 0);
+  ModelMatrix.setIdentity(0, 0, 0);
+  updateModelMatrix(ModelMatrix);
 
   for (var i = 0; i < lily_count; i++) {
     drawLilyPads(g_lilys[i][0], g_lilys[i][1], g_lilys[i][2], g_lilys[i][3]);
@@ -630,12 +646,28 @@ function draw() {
   for (var i = 0; i < log_count; i++) {
     drawLogs(g_logs[i][0], g_logs[i][1], g_logs[i][2], g_logs[i][3]);
   }
-  // for (var i = 0; i < dragonfly_count; i++) {
-  //   drawDragonfly(i);
-  // }
+  for (var i = 0; i < dragonfly_count; i++) {
+    drawDragonfly(i);
+  }
   for (var i = 0; i < cattail_count; i++) {
     drawCattail(g_cattails[i][0], g_cattails[i][1], g_cattails[i][2], g_cattails[i][3]);
   }
+
+  ModelMatrix = popMatrix();
+}
+
+function drawTest() {
+  pushMatrix(ModelMatrix)
+
+  ModelMatrix.translate(0, 0, -0.79);
+  updateModelMatrix(ModelMatrix);
+  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
+
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+
+  ModelMatrix.rotate(new Date().getTime() * 0.1, 1, 0, 0);
+  updateModelMatrix(ModelMatrix);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
 
   ModelMatrix = popMatrix();
 }
@@ -684,9 +716,9 @@ function drawCattailHead(c_sway) {
   ModelMatrix.scale(0.01, 0.01, 0.25); // w, d, h
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_FAN, (g_step * 6) + 4, (g_step * 2) + 2);
-  // ModelMatrix.rotate(180, 1, 0, 0);
-  // updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_FAN, (g_step * 6) + 5, (g_step * 2) + 2);
+  ModelMatrix.rotate(180, 1, 0, 0);
+  updateModelMatrix(ModelMatrix);
+  gl.drawArrays(gl.TRIANGLE_FAN, (g_step * 6) + 5, (g_step * 2) + 2);
 
   // End Group: Tip
   ModelMatrix = popMatrix();
@@ -1049,22 +1081,22 @@ function drawLilyPads(x, y, rot, scale) {
   ModelMatrix.translate(x, y, -0.79);
   ModelMatrix.rotate(rot, 0, 0, 1);
   ModelMatrix.scale(scale, scale, scale);
-  pushMatrix(ModelMatrix);
   updateModelMatrix(ModelMatrix);
+  pushMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(75, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLe, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix = popMatrix();
 
   //draw LilyPad (underside)
@@ -1072,24 +1104,24 @@ function drawLilyPads(x, y, rot, scale) {
   ModelMatrix.scale(.5,-.5,.5);
   //ModelMatrix.translate(0,0,-1);
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
+  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
   pushMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
+  gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
   ModelMatrix = popMatrix();
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix = popMatrix();
 
   //LILY PAD -- PART 1 (LARGE UNDER)
@@ -1099,19 +1131,19 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-2);
   ModelMatrix.rotate(30,0,0,1);
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix = popMatrix();
 
   //draw LilyPad (underside)
@@ -1120,18 +1152,18 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-2);
   ModelMatrix.rotate(30,0,0,1);
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix = popMatrix();
 
   //LILY PAD -- PART 1 (Small)
@@ -1141,25 +1173,25 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-1);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
 
   pushMatrix(ModelMatrix)
   ModelMatrix.scale(.07,.07,.07);
-  ModelMatrix.translate(0,0,1);
+  ModelMatrix.translate(0, 0, 1);
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 6, sphereLen3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 6, sphereLen3);
   ModelMatrix = popMatrix();
 
   ModelMatrix = popMatrix();
@@ -1170,18 +1202,18 @@ function drawLilyPads(x, y, rot, scale) {
   //ModelMatrix.translate(0,0,-1);
   ModelMatrix.rotate(75,0,0,1);
   updateModelMatrix(ModelMatrix);
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70,0,0,1);
   updateModelMatrix(ModelMatrix)
-  // gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix = popMatrix();
   ModelMatrix = popMatrix();
 }
