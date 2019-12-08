@@ -540,9 +540,9 @@ function VBObox1() {
       }
     }
 
-    v_Color1 += vec3(Kd * lambertian * a_Color1 + 
+    v_Color1 += vec3(Kd * lambertian * a_Color1 +
                      Ks * specular * specularColor) * vec3(headLightOn,headLightOn,headLightOn);
- 
+
 		// Testing defaults
 		// v_Color1 = a_Color1;
 		// gl_Position = u_ModelMatrix1 * a_Pos1;
@@ -911,20 +911,20 @@ function VBObox2() {
   uniform mat4 u_NormalMatrix2; // Inverse Transpose of ModelMatrix
 
   // VARYING
-  varying vec3 v_Color; // Phong Lighting: diffuse reflectance
-  varying vec3 v_Position;
-  varying vec3 v_Normal;
+  varying vec3 v_Color2; // Phong Lighting: diffuse reflectance
+  varying vec3 v_Position2;
+  varying vec3 v_Normal2;
 
   void main() {
 		vec4 vertPos = u_ModelMatrix2 * a_Position2;
-		v_Position = vec3(vertPos) / vertPos.w;
+		v_Position2 = vec3(vertPos) / vertPos.w;
 		// TODO: Use u_NormalMatrix2
 		//  Currently causes lambertian & specular to be < 0
-		v_Normal = vec3(u_ModelMatrix2 * vec4(a_Normal2, 0.0));
+		v_Normal2 = vec3(u_ModelMatrix2 * vec4(a_Normal2, 0.0));
     gl_Position = u_ProjectionMatrix2 * vertPos;
-    gl_Position = u_ProjectionMatrix2 * vec4(v_Position, 1.0);
+    gl_Position = u_ProjectionMatrix2 * vec4(v_Position2, 1.0);
 
-    v_Color = a_Color2;
+    v_Color2 = a_Color2;
     u_ProjectionMatrix2;
 		a_Normal2;
 		u_NormalMatrix2;
@@ -955,34 +955,34 @@ function VBObox2() {
 	uniform int u_useBlinnPhong; // Toggel Phong/Blinn-Phong lighting
 
   // VARYING
-  varying vec3 v_Normal;   // Find 3D surface normal at each pix
-  varying vec3 v_Position; // pixel's 3D pos too -- in 'world' coords
-  varying vec3 v_Color;     // Find diffuse reflectance K_d per pix
+  varying vec3 v_Normal2;   // Find 3D surface normal at each pix
+  varying vec3 v_Position2; // pixel's 3D pos too -- in 'world' coords
+  varying vec3 v_Color2;     // Find diffuse reflectance K_d per pix
 
   void main() {
-    vec3 normal = normalize(v_Normal);
-    vec3 lightDirection = normalize(u_LampSet2[0].pos - v_Position);
+    vec3 normal = normalize(v_Normal2);
+    vec3 lightDirection = normalize(u_LampSet2[0].pos - v_Position2);
 
 		float lambertian = max(dot(normal, lightDirection), 0.0);
 		float specular = 0.0;
 		if (lambertian > 0.0) {
 			if (u_useBlinnPhong == 1) {
-				vec3 V = normalize(-v_Position);
+				vec3 V = normalize(-v_Position2);
 				vec3 H = (lightDirection + V) / length(lightDirection + V);
 				float specAngle = max(dot(normal, H), 0.0);
 				specular = pow(specAngle, float(u_MatlSet2[0].shiny));
 			} else {
 				vec3 R = reflect(-lightDirection, normal);
-				vec3 V = normalize(-v_Position);
+				vec3 V = normalize(-v_Position2);
 				float specAngle = max(dot(R, V), 0.0);
 				specular = pow(specAngle, float(u_MatlSet2[0].shiny));
 			}
 		}
 
 		gl_FragColor = vec4(
-			v_Color * u_LampSet2[0].ambi +
-			v_Color * u_LampSet2[0].diff * lambertian +
-			v_Color * u_LampSet2[0].spec * specular,
+			v_Color2 * u_LampSet2[0].ambi +
+			v_Color2 * u_LampSet2[0].diff * lambertian +
+			v_Color2 * u_LampSet2[0].spec * specular,
 			1.0
 		);
 		// gl_FragColor = vec4(
@@ -1002,12 +1002,12 @@ function VBObox2() {
           // R G B   | Color (3)
           // I J K   | Normal (3)
 
-  this.vboContents = Float32Concat(positions,Float32Concat(float_colors,normals));
+  this.vboContents = Float32Concat(positions, Float32Concat(float_colors, normals));
 
   //--------------------- Attribute sizes
-  this.vboFcount_a_Pos1 =  posDimensions;
-  this.vboFcount_a_Colr1 = colorsDimensions;
-  this.vboFcount_a_Normal1 = normalsDimensions;
+  this.vboFcount_a_Position2 = posDimensions;
+  this.vboFcount_a_Color2 = colorsDimensions;
+  this.vboFcount_a_Normal2 = normalsDimensions;
 
   // console.assert((pos.length/4 == colors.length/3 && colors.length/3 == norms.length/3),
   //            "Number of vertices across positions, colors, and normals vectors not equal");
@@ -1029,9 +1029,9 @@ function VBObox2() {
 
 
   //Attribute offsets
-  this.vboOffset_a_Pos1 = 0;
-  this.vboOffset_a_Colr1 = (this.vboFcount_a_Pos1) * this.FSIZE * numVertices;
-  this.vboOffset_a_Normal1 = (this.vboFcount_a_Pos1 + this.vboFcount_a_Colr1) * this.FSIZE * numVertices;
+  this.vboOffset_a_Position2 = 0;
+  this.vboOffset_a_Color2 = (this.vboOffset_a_Position2) * this.FSIZE * numVertices;
+  this.vboOffset_a_Normal2 = (this.vboOffset_a_Position2 + this.vboFcount_a_Color2) * this.FSIZE * numVertices;
 
 	            //-----------------------GPU memory locations:
 	this.vboLoc;									// GPU Location for Vertex Buffer Object,
@@ -1039,9 +1039,9 @@ function VBObox2() {
 	this.shaderLoc;								// GPU Location for compiled Shader-program
 	                            	// set by compile/link of VERT_SRC and FRAG_SRC.
 								          //------Attribute locations in our shaders:
-  this.a_Pos1Loc;
-  this.a_Colr1Loc;
-  this.a_Normal1Loc;
+  this.a_PositionLoc;
+  this.a_ColorLoc;
+  this.a_NormalLoc;
 
 	            //---------------------- Uniform locations &values in our shaders
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
@@ -1100,19 +1100,19 @@ VBObox2.prototype.init = function() {
   this.a_PositionLoc = gl.getAttribLocation(this.shaderLoc, 'a_Position2');
   if (this.a_PositionLoc < 0) {
     console.log(this.constructor.name +
-    						'.init() Failed to get GPU location of attribute a_Position');
+    						'.init() Failed to get GPU location of attribute a_Position2');
     return -1;	// error exit.
   }
  	this.a_ColorLoc = gl.getAttribLocation(this.shaderLoc, 'a_Color2');
   if (this.a_ColorLoc < 0) {
     console.log(this.constructor.name +
-    						'.init() failed to get the GPU location of attribute a_Color');
+    						'.init() failed to get the GPU location of attribute a_Color2');
     return -1;	// error exit.
   }
   this.a_NormalLoc = gl.getAttribLocation(this.shaderLoc, 'a_Normal2');
-  if (this.a_Normal < 0) {
+  if (this.a_NormalLoc < 0) {
     console.log(this.constructor.name +
-	    					'.init() failed to get the GPU location of attribute a_Normal');
+	    					'.init() failed to get the GPU location of attribute a_Normal2');
 	  return -1;	// error exit.
   }
   // c2) Find All Uniforms:-----------------------------------------------------
@@ -1217,8 +1217,8 @@ gl.useProgram(this.shaderLoc);
   // 	Here's how to use the almost-identical OpenGL version of this function:
 	//		http://www.opengl.org/sdk/docs/man/xhtml/glVertexAttribPointer.xml )
   gl.vertexAttribPointer(
-    this.a_Pos1Loc,//index == ID# for the attribute var in GLSL shader pgm;
-    this.vboFcount_a_Pos1, // # of floats used by this attribute: 1,2,3 or 4?
+    this.a_PositionLoc,//index == ID# for the attribute var in GLSL shader pgm;
+    this.vboFcount_a_Position2, // # of floats used by this attribute: 1,2,3 or 4?
     gl.FLOAT,     // type == what data type did we use for those numbers?
     false,        // isNormalized == are these fixed-point values that we need
                   //                  normalize before use? true or false
@@ -1229,19 +1229,19 @@ gl.useProgram(this.shaderLoc);
                   // to zero, the GPU gets attribute values sequentially from
                   // VBO, starting at 'Offset'.
                   // (Our vertex size in bytes: 4 floats for pos + 3 for color)
-    this.vboOffset_a_Pos1);
+    this.vboOffset_a_Position2);
                   // Offset == how many bytes from START of buffer to the first
                   // value we will actually use?  (we start with position).
-  gl.vertexAttribPointer(this.a_Colr1Loc, this.vboFcount_a_Colr1,
+  gl.vertexAttribPointer(this.a_ColorLoc, this.vboFcount_a_Color2,
                          gl.FLOAT, false,
-                         this.vboStrideColors,  this.vboOffset_a_Colr1);
-  gl.vertexAttribPointer(this.a_Normal1Loc,this.vboFcount_a_Normal1,
+                         this.vboStrideColors,  this.vboOffset_a_Color2);
+  gl.vertexAttribPointer(this.a_NormalLoc,this.vboFcount_a_Normal2,
                          gl.FLOAT, false,
-                         this.vboStrideNormals, this.vboOffset_a_Normal1);
+                         this.vboStrideNormals, this.vboOffset_a_Normal2);
   //-- Enable this assignment of the attribute to its' VBO source:
-  gl.enableVertexAttribArray(this.a_Pos1Loc);
-  gl.enableVertexAttribArray(this.a_Colr1Loc);
-  gl.enableVertexAttribArray(this.a_Normal1Loc);
+  gl.enableVertexAttribArray(this.a_PositionLoc);
+  gl.enableVertexAttribArray(this.a_ColorLoc);
+  gl.enableVertexAttribArray(this.a_NormalLoc);
 }
 
 VBObox2.prototype.isReady = function() {
