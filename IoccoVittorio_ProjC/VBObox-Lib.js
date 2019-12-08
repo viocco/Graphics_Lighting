@@ -918,11 +918,8 @@ function VBObox2() {
   void main() {
 		vec4 vertPos = u_ModelMatrix2 * a_Position2;
 		v_Position2 = vec3(vertPos) / vertPos.w;
-		// TODO: Use u_NormalMatrix2
-		//  Currently causes lambertian & specular to be < 0
-		v_Normal2 = vec3(u_ModelMatrix2 * vec4(a_Normal2, 0.0));
+		v_Normal2 = vec3(u_NormalMatrix2 * vec4(a_Normal2, 0.0));
     gl_Position = u_ProjectionMatrix2 * vertPos;
-    gl_Position = u_ProjectionMatrix2 * vec4(v_Position2, 1.0);
 
     v_Color2 = a_Color2;
     u_ProjectionMatrix2;
@@ -1030,8 +1027,8 @@ function VBObox2() {
 
   //Attribute offsets
   this.vboOffset_a_Position2 = 0;
-  this.vboOffset_a_Color2 = (this.vboOffset_a_Position2) * this.FSIZE * numVertices;
-  this.vboOffset_a_Normal2 = (this.vboOffset_a_Position2 + this.vboFcount_a_Color2) * this.FSIZE * numVertices;
+  this.vboOffset_a_Color2 = (this.vboFcount_a_Position2) * this.FSIZE * numVertices;
+  this.vboOffset_a_Normal2 = (this.vboFcount_a_Position2 + this.vboFcount_a_Color2) * this.FSIZE * numVertices;
 
 	            //-----------------------GPU memory locations:
 	this.vboLoc;									// GPU Location for Vertex Buffer Object,
