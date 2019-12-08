@@ -13,9 +13,9 @@ var GuiTracker = function() {
   this.freelight_pos_y = 1;
   this.freelight_pos_z = 1;
   this.freelight_palette = {
-    ambient: '#FFFFFF',
-    diffuse: '#FFFFFF',
-    specular: '#FFFFFF'
+    ambient: [255,255,255],
+    diffuse: [255,255,255],
+    specular: [255,255,255]
   };
   // Animation
   this.animate_toggle = true;
@@ -96,9 +96,9 @@ function initGui() {
   lamps.add(tracker, 'freelight_pos_x').name('Free Lamp x Position');
   lamps.add(tracker, 'freelight_pos_y').name('Free Lamp y Position');
   lamps.add(tracker, 'freelight_pos_z').name('Free Lamp z Position');
-  lamps.add(tracker.freelight_palette, 'ambient');
-  lamps.add(tracker.freelight_palette, 'diffuse');
-  lamps.add(tracker.freelight_palette, 'specular');
+  lamps.addColor(tracker.freelight_palette, 'ambient');
+  lamps.addColor(tracker.freelight_palette, 'diffuse');
+  lamps.addColor(tracker.freelight_palette, 'specular');
   // lamps.open();
   var anim = gui.addFolder('Animations');
   anim.add(tracker, 'animate_toggle').name('Toggle Animation').listen().onChange(function(value) {
