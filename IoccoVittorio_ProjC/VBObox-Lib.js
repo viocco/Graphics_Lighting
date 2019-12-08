@@ -826,7 +826,7 @@ VBObox1.prototype.adjust = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
-
+  
   this.ProjectionMatrix.setPerspective(30 * aspect, aspect, 1, 100);
   this.ProjectionMatrix.lookAt(
     g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
@@ -980,9 +980,9 @@ function VBObox2() {
 		}
 
 		gl_FragColor = vec4(
-			v_Color2 * u_LampSet2[0].ambi +
-			v_Color2 * u_LampSet2[0].diff * lambertian +
-			v_Color2 * u_LampSet2[0].spec * specular,
+			vec3(1,1,1) * u_LampSet2[0].ambi +
+			vec3(1,1,1) * u_LampSet2[0].diff * lambertian +
+			vec3(1,1,1) * u_LampSet2[0].spec * specular,
 			1.0
 		);
 		// gl_FragColor = vec4(

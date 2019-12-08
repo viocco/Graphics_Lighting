@@ -192,6 +192,7 @@ function drawResize() {
   g_canvasID.width = window.innerWidth;
   g_canvasID.height = window.innerHeight;
   aspect = g_canvasID.width / g_canvasID.height;
+  gl.viewport(0, 0, g_canvasID.width, g_canvasID.height);
 }
 
 function myKeyDown(kev) {
