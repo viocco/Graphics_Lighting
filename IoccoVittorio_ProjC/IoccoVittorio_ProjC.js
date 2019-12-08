@@ -622,12 +622,6 @@ function lerp(a, b, l) {
   return (a * l + (b * (1 - l)));
 }
 
-function drawResize() {
-  gl = getWebGLContext(g_canvasID);
-  g_canvasID.width = window.innerWidth;
-  g_canvasID.height = window.innerHeight;
-}
-
 /*
  * Main draw handler, sets up global matrix and calls other draw functions.
  */

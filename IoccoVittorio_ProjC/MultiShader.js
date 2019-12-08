@@ -187,6 +187,13 @@ function drawAll() {
   }
 }
 
+function drawResize() {
+  gl = getWebGLContext(g_canvasID);
+  g_canvasID.width = window.innerWidth;
+  g_canvasID.height = window.innerHeight;
+  aspect = g_canvasID.width / g_canvasID.height;
+}
+
 function myKeyDown(kev) {
   var code;
   if (!kev.code) {
