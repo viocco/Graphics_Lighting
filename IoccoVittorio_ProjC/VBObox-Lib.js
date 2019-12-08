@@ -500,7 +500,7 @@ function VBObox1() {
 		gl_Position = u_ProjectionMatrix1 * vertPos;
 
 		vec3 N = normalize(v_NormalInterp);
-		vec3 L = normalize(headLightPos - v_VertPos);
+		vec3 L = normalize(freeLightPos - v_VertPos);
 		// Lambert stuff
 		float lambertian = max(dot(N, L), 0.0);
 		float specular = 0.0;
@@ -520,16 +520,18 @@ function VBObox1() {
 
   	v_Color1 = vec3(Ka_FreeLight * a_Color1 * 0.15 +
 									 (Kd_FreeLight * lambertian * a_Color1) +
-								   Ks_FreeLight * specular * specularColor) * vec3(1,1,1);
+								   Ks_FreeLight * specular * specularColor) * vec3(freeLightOn,freeLightOn,freeLightOn);
 
-    if (specular == 0.0) {
-      v_Color1 = vec3(1.0,1.0,1.0);
-    }
+    //=if (specular == 0.0) {
+     // v_Color1 = vec3(1.0,1.0,1.0);
+    //}
 
 		// Testing defaults
 		// v_Color1 = a_Color1;
 		// gl_Position = u_ModelMatrix1 * a_Pos1;
 		// u_ProjectionMatrix1; a_Normal1; u_NormalMatrix1;
+    headLightPos;
+    headLightOn;
   }`;
 
 	this.FRAG_SRC = `
@@ -665,49 +667,49 @@ VBObox1.prototype.init = function() {
   this.u_lightPos = gl.getUniformLocation(this.shaderLoc, 'freeLightPos');
   if (!this.u_lightPos) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_lightPos uniform');
     return;
   }
 
   this.u_freeLightOn = gl.getUniformLocation(this.shaderLoc, 'freeLightOn');
   if (!this.u_freeLightOn) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_freeLightOn uniform');
     return;
   }
 
   this.u_Ka_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Ka_FreeLight');
-  if (!this.u_freeLightOn) {
+  if (!this.u_Ka_FreeLight) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_Ka_FreeLight uniform');
     return;
   }
   
   this.u_Kd_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Kd_FreeLight');
-  if (!this.u_freeLightOn) {
+  if (!this.u_Kd_FreeLight) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_Kd_FreeLight uniform');
     return;
   }
   
   this.u_Ks_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Ks_FreeLight');
-  if (!this.u_freeLightOn) {
+  if (!this.u_Ks_FreeLight) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_Ks_FreeLight uniform');
     return;
   }
 
   this.u_headLightPos = gl.getUniformLocation(this.shaderLoc, 'headLightPos');
-  if (!this.u_freeLightOn) {
+  if (!this.u_headLightPos) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_headLightPos uniform');
     return;
   }
 
   this.u_headLightOn = gl.getUniformLocation(this.shaderLoc, 'headLightOn');
-  if (!this.u_freeLightOn) {
+  if (!this.u_headLightOn) {
     console.log(this.constructor.name +
-                '.init() failed to get GPU location for u_NormalMatrix uniform');
+                '.init() failed to get GPU location for u_headLightOn uniform');
     return;
   }
 
