@@ -486,7 +486,7 @@ function VBObox1() {
 	float Kd = 1.0; // Diffuse reflection coefficient
 	float Ks = 1.0; // Specular reflection coefficient
 	float shininess = 80.0;
-	
+
   // Material color
 	vec3 ambientColor = vec3(0.2, 0.1, 0.0);
 	vec3 diffuseColor = vec3(1.0, 0.0, 0.0);
@@ -700,14 +700,14 @@ VBObox1.prototype.init = function() {
                 '.init() failed to get GPU location for u_Ka_FreeLight uniform');
     return;
   }
-  
+
   this.u_Kd_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Kd_FreeLight');
   if (!this.u_Kd_FreeLight) {
     console.log(this.constructor.name +
                 '.init() failed to get GPU location for u_Kd_FreeLight uniform');
     return;
   }
-  
+
   this.u_Ks_FreeLight = gl.getUniformLocation(this.shaderLoc, 'Ks_FreeLight');
   if (!this.u_Ks_FreeLight) {
     console.log(this.constructor.name +
@@ -922,8 +922,9 @@ function VBObox2() {
 		//  Currently causes lambertian & specular to be < 0
 		v_Normal = vec3(u_ModelMatrix2 * vec4(a_Normal2, 0.0));
     gl_Position = u_ProjectionMatrix2 * vertPos;
+    gl_Position = u_ProjectionMatrix2 * vec4(v_Position, 1.0);
 
-    a_Color2;
+    v_Color = a_Color2;
     u_ProjectionMatrix2;
 		a_Normal2;
 		u_NormalMatrix2;
@@ -979,13 +980,21 @@ function VBObox2() {
 		}
 
 		gl_FragColor = vec4(
-			u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
-			u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
-			u_MatlSet2[0].spec * u_LampSet2[0].spec * specular,
+			v_Color * u_LampSet2[0].ambi +
+			v_Color * u_LampSet2[0].diff * lambertian +
+			v_Color * u_LampSet2[0].spec * specular,
 			1.0
 		);
+		// gl_FragColor = vec4(
+		// 	u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
+		// 	u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
+		// 	u_MatlSet2[0].spec * u_LampSet2[0].spec * specular,
+		// 	1.0
+		// );
+		// gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
 
 		u_eyePosWorld;
+		u_MatlSet2[0];
   }`;
 
   //-------Vertices---------
@@ -1293,7 +1302,8 @@ VBObox2.prototype.adjust = function() {
     // 0, 0, 0,
     // 0, 0, 1
 	);
-  //gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
+
+  gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
 
