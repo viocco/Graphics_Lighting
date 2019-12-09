@@ -6,6 +6,7 @@ var GuiTracker = function() {
   this.phong = false;
   // Lighting
   this.blinnphong = false;
+  this.material = 11;
   // Lamps
   this.headlight = true;
   this.freelight = true;
@@ -13,9 +14,9 @@ var GuiTracker = function() {
   this.freelight_pos_y = 1;
   this.freelight_pos_z = 1;
   this.freelight_palette = {
-    ambient: [255,255,255],
-    diffuse: [255,255,255],
-    specular: [255,255,255]
+    ambient: [255, 255, 255],
+    diffuse: [255, 255, 255],
+    specular: [255, 255, 255]
   };
   // Animation
   this.animate_toggle = true;
@@ -23,45 +24,53 @@ var GuiTracker = function() {
   // Object Management
   this.addDragonfly = function() {
     tracker.animate_toggle = false;
-    setTimeout(function(){
+    setTimeout(function() {
       dragonfly_count++;
       addDragonfly();
       tracker.animate_toggle = true;
       g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
+      for (var i = 0; i < g_cattails.length; i++) {
+        g_cattails[i][4] = Date.now();
+      }
       tick();
     }, 10);
   };
   this.addCattail = function() {
     tracker.animate_toggle = false;
-    setTimeout(function(){
+    setTimeout(function() {
       cattail_count++;
       addCattail();
       tracker.animate_toggle = true;
       g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
+      for (var i = 0; i < g_cattails.length; i++) {
+        g_cattails[i][4] = Date.now();
+      }
       tick();
     }, 10);
   };
   this.removeDragonfly = function() {
     tracker.animate_toggle = false;
-    setTimeout(function(){
+    setTimeout(function() {
       dragonfly_count--;
       removeDragonfly();
       tracker.animate_toggle = true;
       g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
+      for (var i = 0; i < g_cattails.length; i++) {
+        g_cattails[i][4] = Date.now();
+      }
       tick();
     }, 10);
   };
   this.removeCattail = function() {
     tracker.animate_toggle = false;
-    setTimeout(function(){
+    setTimeout(function() {
       cattail_count--;
       removeCattail();
       tracker.animate_toggle = true;
       g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
+      for (var i = 0; i < g_cattails.length; i++) {
+        g_cattails[i][4] = Date.now();
+      }
       tick();
     }, 10);
   };
@@ -82,14 +91,48 @@ var help_visible = false;
  * Initializes the GUI at startup, registers variable state listeners.
  */
 function initGui() {
-  gui = new dat.GUI({name: 'My GUI', hideable: false});
+  gui = new dat.GUI({
+    name: 'My GUI',
+    hideable: false
+  });
   var shading = gui.addFolder('Shading');
-  shading.add(tracker, 'gouraud').name('Gouraud Shading').listen().onChange(function(){tracker.gouraud = true; tracker.phong = false;});
-  shading.add(tracker, 'phong').name('Phong Shading').listen().onChange(function(){tracker.gouraud = false; tracker.phong = true;});
+  shading.add(tracker, 'gouraud').name('Gouraud Shading').listen().onChange(function() {
+    tracker.gouraud = true;
+    tracker.phong = false;
+  });
+  shading.add(tracker, 'phong').name('Phong Shading').listen().onChange(function() {
+    tracker.gouraud = false;
+    tracker.phong = true;
+  });
   shading.open();
-  var lighting = gui.addFolder('Lighting');
-  lighting.add(tracker, 'blinnphong').name('Blinn-Phong Lighting');
-  lighting.open();
+  // var lighting = gui.addFolder('Lighting');
+  gui.add(tracker, 'blinnphong').name('Blinn-Phong Lighting');
+  gui.add(tracker, 'material',
+          {
+            MATL_RED_PLASTIC: 1,
+            MATL_GRN_PLASTIC: 2,
+            MATL_BLU_PLASTIC: 3,
+            MATL_BLACK_PLASTIC: 4,
+            MATL_BLACK_RUBBER: 5,
+            MATL_BRASS: 6,
+            MATL_BRONZE_DULL: 7,
+            MATL_BRONZE_SHINY: 8,
+            MATL_CHROME: 9,
+            MATL_COPPER_DULL: 10,
+            MATL_COPPER_SHINY: 11,
+            MATL_GOLD_DULL: 12,
+            MATL_GOLD_SHINY: 13,
+            MATL_PEWTER: 14,
+            MATL_SILVER_DULL: 15,
+            MATL_SILVER_SHINY: 16,
+            MATL_EMERALD: 17,
+            MATL_JADE: 18,
+            MATL_OBSIDIAN: 19,
+            MATL_PEARL: 20,
+            MATL_RUBY: 21,
+            MATL_TURQUOISE: 22
+          }).name('Sphere Material');
+  // lighting.open();
   var lamps = gui.addFolder('Lamps');
   lamps.add(tracker, 'headlight').name('Head Lamp Toggle');
   lamps.add(tracker, 'freelight').name('Free Lamp Toggle');
@@ -104,7 +147,9 @@ function initGui() {
   anim.add(tracker, 'animate_toggle').name('Toggle Animation').listen().onChange(function(value) {
     if (value) {
       g_last = Date.now();
-      for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
+      for (var i = 0; i < g_cattails.length; i++) {
+        g_cattails[i][4] = Date.now();
+      }
       tick();
     }
   });
@@ -123,7 +168,9 @@ function initGui() {
   gui.add(tracker, 'reset').name('Reset');
   if (!gui_open)
     gui.close();
-  document.getElementsByClassName('close-bottom')[0].onclick = function() {gui_open = !gui_open;};
+  document.getElementsByClassName('close-bottom')[0].onclick = function() {
+    gui_open = !gui_open;
+  };
 }
 
 function toggle_gui() {

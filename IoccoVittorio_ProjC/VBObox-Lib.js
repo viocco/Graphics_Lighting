@@ -114,6 +114,7 @@ var normals = new Float32Array(numVertices*normalsDimensions);
 var g_step = 8.0; // [4, +inf]
 var u_ModelMatrixLoc;
 var u_NormalMatrixLoc;
+var u_MaterialLoc;
 
 // Ground Plane
 function VBObox0() {
@@ -826,7 +827,7 @@ VBObox1.prototype.adjust = function() {
         console.log('ERROR! before' + this.constructor.name +
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
-  
+
   this.ProjectionMatrix.setPerspective(30 * aspect, aspect, 1, 100);
   this.ProjectionMatrix.lookAt(
     g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
@@ -976,19 +977,18 @@ function VBObox2() {
 			}
 		}
 
-		gl_FragColor = vec4(
-			v_Color2 * u_LampSet2[0].ambi +
-			v_Color2 * u_LampSet2[0].diff * lambertian +
-			v_Color2 * u_LampSet2[0].spec * specular,
-			1.0
-		);
 		// gl_FragColor = vec4(
-		// 	u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
-		// 	u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
-		// 	u_MatlSet2[0].spec * u_LampSet2[0].spec * specular,
+		// 	v_Color2 * u_LampSet2[0].ambi +
+		// 	v_Color2 * u_LampSet2[0].diff * lambertian +
+		// 	v_Color2 * u_LampSet2[0].spec * specular,
 		// 	1.0
 		// );
-		// gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+		gl_FragColor = vec4(
+			u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
+			u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
+			u_MatlSet2[0].spec * u_LampSet2[0].spec * specular,
+			1.0
+		);
 
 		u_eyePosWorld;
 		u_MatlSet2[0];
@@ -1239,6 +1239,10 @@ gl.useProgram(this.shaderLoc);
   gl.enableVertexAttribArray(this.a_PositionLoc);
   gl.enableVertexAttribArray(this.a_ColorLoc);
   gl.enableVertexAttribArray(this.a_NormalLoc);
+
+	u_ModelMatrixLoc = this.u_ModelMatrixLoc;
+	u_NormalMatrixLoc = this.u_NormalMatrixLoc;
+	u_MaterialLoc = this.matl0;
 }
 
 VBObox2.prototype.isReady = function() {
@@ -1304,9 +1308,7 @@ VBObox2.prototype.adjust = function() {
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
 
-	u_ModelMatrixLoc = this.u_ModelMatrixLoc;
-	u_NormalMatrixLoc = this.u_NormalMatrixLoc;
-  this.reload();
+	this.reload();
 }
 
 VBObox2.prototype.draw = function() {
@@ -1391,6 +1393,16 @@ function CreateVBO() {
           // I J K   | Normal (3)
 
   vertexCount = initVBO();  //From IoccoVittorio_ProC.js
+}
+
+function updateMaterial(material) {
+	if (!tracker.phong) return;
+  var updatedMaterial = new Material(Number(material));
+	gl.uniform3fv(u_MaterialLoc.uLoc_Ke,     updatedMaterial.K_emit.slice(0,3));     // Ke emissive
+	gl.uniform3fv(u_MaterialLoc.uLoc_Ka,     updatedMaterial.K_ambi.slice(0,3));     // Ka ambient
+	gl.uniform3fv(u_MaterialLoc.uLoc_Kd,     updatedMaterial.K_diff.slice(0,3));     // Kd diffuse
+	gl.uniform3fv(u_MaterialLoc.uLoc_Ks,     updatedMaterial.K_spec.slice(0,3));     // Ks specular
+	gl.uniform1i( u_MaterialLoc.uLoc_Kshiny, parseInt(updatedMaterial.K_shiny, 10)); // Kshiny
 }
 
 function updateModelMatrix(matrix) {
