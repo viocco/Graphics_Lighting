@@ -540,7 +540,8 @@ function VBObox1() {
       }
     }
 
-    v_Color1 += vec3(Kd * lambertian * a_Color1 +
+    v_Color1 += vec3(Ka * a_Color1 * 0.15 +
+                     Kd * lambertian * a_Color1 +
                      Ks * specular * specularColor) * vec3(headLightOn,headLightOn,headLightOn);
 
 		// Testing defaults
@@ -649,30 +650,35 @@ VBObox1.prototype.init = function() {
     						'.init() Failed to get GPU location of attribute a_Pos1');
     return -1;
   }
+
  	this.a_Colr1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Color1');
   if (this.a_Colr1Loc < 0) {
     console.log(this.constructor.name +
     						'.init() failed to get the GPU location of attribute a_Colr1');
     return -1;
   }
+
   this.a_Normal1Loc = gl.getAttribLocation(this.shaderLoc, 'a_Normal1');
   if (this.a_Normal1Loc < 0) {
     console.log(this.constructor.name +
 	    					'.init() failed to get the GPU location of attribute a_Normal1');
 	  return -1;
   }
+
  	this.u_ModelMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ModelMatrix1');
   if (!this.u_ModelMatrixLoc) {
     console.log(this.constructor.name +
     						'.init() failed to get GPU location for u_ModelMatrix uniform');
     return;
   }
+
 	this.u_ProjectionMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_ProjectionMatrix1');
 	if (!this.u_ProjectionMatrixLoc) {
 	  console.log(this.constructor.name +
 	   						'.init() failed to get GPU location for u_ProjectionMatrix uniform');
 	  return;
 	}
+
 	this.u_NormalMatrixLoc = gl.getUniformLocation(this.shaderLoc, 'u_NormalMatrix1');
   if (!this.u_NormalMatrixLoc) {
     console.log(this.constructor.name +
@@ -798,6 +804,16 @@ VBObox1.prototype.switchToMe = function () {
   gl.enableVertexAttribArray(this.a_Pos1Loc);
   gl.enableVertexAttribArray(this.a_Colr1Loc);
   gl.enableVertexAttribArray(this.a_Normal1Loc);
+
+  this.lightPos.elements.set([tracker.freelight_pos_x, tracker.freelight_pos_y, tracker.freelight_pos_z]);
+  this.headLightPos.elements.set([g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2]]);
+  this.Ka_FreeLight = [tracker.freelight_palette.ambient[0]/255.0, tracker.freelight_palette.ambient[1]/255.0, tracker.freelight_palette.ambient[2]/255.0];
+  this.Kd_FreeLight = [tracker.freelight_palette.diffuse[0]/255.0, tracker.freelight_palette.diffuse[1]/255.0, tracker.freelight_palette.diffuse[2]/255.0];
+  this.Ks_FreeLight = [tracker.freelight_palette.specular[0]/255.0, tracker.freelight_palette.specular[1]/255.0, tracker.freelight_palette.specular[2]/255.0];
+
+  this.freeLightOn = tracker.freelight;
+  this.headLightOn = tracker.headlight;
+
 }
 
 VBObox1.prototype.isReady = function() {
@@ -827,32 +843,17 @@ VBObox1.prototype.adjust = function() {
   						'.adjust() call you needed to call this.switchToMe()!!');
   }
   
+
   this.ProjectionMatrix.setPerspective(30 * aspect, aspect, 1, 100);
   this.ProjectionMatrix.lookAt(
     g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2],
     g_perspective_lookat[0], g_perspective_lookat[1], g_perspective_lookat[2],
     g_perspective_up[0], g_perspective_up[1], g_perspective_up[2],
   );
+
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
 	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
-
-	u_ModelMatrixLoc = this.u_ModelMatrixLoc;
-	u_NormalMatrixLoc = this.u_NormalMatrixLoc;
-}
-
-VBObox1.prototype.draw = function() {
-//=============================================================================
-// Send commands to GPU to select and render current VBObox contents.
-
-  this.lightPos.elements.set([tracker.freelight_pos_x, tracker.freelight_pos_y, tracker.freelight_pos_z]);
-  this.headLightPos.elements.set([g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2]]);
-  this.Ka_FreeLight = [tracker.freelight_palette.ambient[0]/255.0, tracker.freelight_palette.ambient[1]/255.0, tracker.freelight_palette.ambient[2]/255.0];
-  this.Kd_FreeLight = [tracker.freelight_palette.diffuse[0]/255.0, tracker.freelight_palette.diffuse[1]/255.0, tracker.freelight_palette.diffuse[2]/255.0];
-  this.Ks_FreeLight = [tracker.freelight_palette.specular[0]/255.0, tracker.freelight_palette.specular[1]/255.0, tracker.freelight_palette.specular[2]/255.0];
-
-  this.freeLightOn = tracker.freelight;
-  this.headLightOn = tracker.headlight;
 
   gl.uniform3fv(this.u_lightPos, this.lightPos.elements);
   gl.uniform3fv(this.u_headLightPos, this.headLightPos.elements);
@@ -862,6 +863,13 @@ VBObox1.prototype.draw = function() {
   gl.uniform3fv(this.u_Kd_FreeLight, this.Kd_FreeLight);
   gl.uniform3fv(this.u_Ks_FreeLight, this.Ks_FreeLight);
 
+	u_ModelMatrixLoc = this.u_ModelMatrixLoc;
+	u_NormalMatrixLoc = this.u_NormalMatrixLoc;
+}
+
+VBObox1.prototype.draw = function() {
+//=============================================================================
+// Send commands to GPU to select and render current VBObox contents.
 
   // check: was WebGL context set to use our VBO & shader program?
   if(this.isReady()==false) {
@@ -946,10 +954,11 @@ function VBObox2() {
    };
 
   // UNIFORMS
-  uniform LampT u_LampSet2[1]; // Array of all light sources
+  uniform LampT u_LampSet2[2]; // Array of all light sources
   uniform MatlT u_MatlSet2[1]; // Array of all materials
   uniform vec3 u_eyePosWorld; // Camera/eye location in world coords
 	uniform int u_useBlinnPhong; // Toggel Phong/Blinn-Phong lighting
+  uniform int lightsOn[2]; //array for lights on or off
 
   // VARYING
   varying vec3 v_Normal2;   // Find 3D surface normal at each pix
@@ -958,30 +967,35 @@ function VBObox2() {
 
   void main() {
     vec3 normal = normalize(v_Normal2);
-    vec3 lightDirection = normalize(u_LampSet2[0].pos - v_Position2);
+    const int num_lights = 2;
+    for (int i = 0; i < num_lights ; i++) {
+      vec3 lightDirection = normalize(u_LampSet2[i].pos - v_Position2);
 
-		float lambertian = max(dot(normal, lightDirection), 0.0);
-		float specular = 0.0;
-		if (lambertian > 0.0) {
-			if (u_useBlinnPhong == 1) {
-				vec3 V = normalize(-v_Position2);
-				vec3 H = (lightDirection + V) / length(lightDirection + V);
-				float specAngle = max(dot(normal, H), 0.0);
-				specular = pow(specAngle, float(u_MatlSet2[0].shiny));
-			} else {
-				vec3 R = reflect(-lightDirection, normal);
-				vec3 V = normalize(-v_Position2);
-				float specAngle = max(dot(R, V), 0.0);
-				specular = pow(specAngle, float(u_MatlSet2[0].shiny));
-			}
-		}
+      float lambertian = max(dot(normal, lightDirection), 0.0);
+      float specular = 0.0;
+      if (lambertian > 0.0) {
+        if (u_useBlinnPhong == 1) {
+          vec3 V = normalize(-v_Position2);
+          vec3 H = (lightDirection + V) / length(lightDirection + V);
+          float specAngle = max(dot(normal, H), 0.0);
+          specular = pow(specAngle, float(u_MatlSet2[0].shiny));
+        } else {
+          vec3 R = reflect(-lightDirection, normal);
+          vec3 V = normalize(-v_Position2);
+          float specAngle = max(dot(R, V), 0.0);
+          specular = pow(specAngle, float(u_MatlSet2[0].shiny));
+        }
+      }
 
-		gl_FragColor = vec4(
-			v_Color2 * u_LampSet2[0].ambi +
-			v_Color2 * u_LampSet2[0].diff * lambertian +
-			v_Color2 * u_LampSet2[0].spec * specular,
-			1.0
-		);
+    gl_FragColor += vec4(
+      v_Color2 * u_LampSet2[i].ambi * 0.15 +
+      v_Color2 * u_LampSet2[i].diff * lambertian +
+      v_Color2 * u_LampSet2[i].spec * specular,
+      1.0
+    ) * float(lightsOn[i]); 
+
+    }
+    
 		// gl_FragColor = vec4(
 		// 	u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
 		// 	u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
@@ -992,6 +1006,7 @@ function VBObox2() {
 
 		u_eyePosWorld;
 		u_MatlSet2[0];
+    u_LampSet2[1];
   }`;
 
   //-------Vertices---------
@@ -1044,6 +1059,10 @@ function VBObox2() {
 	this.ModelMatrix = new Matrix4();	// Transforms CVV axes to model axes.
 	this.u_ModelMatrixLoc;						// GPU location for u_ModelMat uniform
 
+  //Initialize LightOn Var
+  this.lightsOn = [1,1];
+  this.u_LightsOn;
+
   // ------ Additions ------
   this.eyePosWorld = new Float32Array(3); //x,y,z in world coords
   this.u_eyePosWorldLoc; // GPU location for u_ModelMat uniform
@@ -1054,6 +1073,7 @@ function VBObox2() {
 	this.u_useBlinnPhongLoc;
 
   this.lamp0 = new LightsT();
+  this.lamp1 = new LightsT();
   this.matlSel = MATL_GOLD_SHINY;
   this.matl0 = new Material(this.matlSel);
 };
@@ -1142,12 +1162,28 @@ VBObox2.prototype.init = function() {
     return;
   }
 
+  this.u_LightsOn = gl.getUniformLocation(this.shaderLoc, 'lightsOn');
+  if (!this.u_eyePosWorldLoc) {
+    console.log(this.constructor.name +
+                '.init() failed to get GPU location for u_eyePosWorld uniform');
+    return;
+  }
+
   this.lamp0.u_pos  = gl.getUniformLocation(gl.program, 'u_LampSet2[0].pos');
   this.lamp0.u_ambi = gl.getUniformLocation(gl.program, 'u_LampSet2[0].ambi');
   this.lamp0.u_diff = gl.getUniformLocation(gl.program, 'u_LampSet2[0].diff');
   this.lamp0.u_spec = gl.getUniformLocation(gl.program, 'u_LampSet2[0].spec');
   if( !this.lamp0.u_pos || !this.lamp0.u_ambi || !this.lamp0.u_diff || !this.lamp0.u_spec ) {
     console.log('Failed to get GPUs Lamp0 storage locations');
+   return;
+  }
+
+  this.lamp1.u_pos  = gl.getUniformLocation(gl.program, 'u_LampSet2[1].pos');
+  this.lamp1.u_ambi = gl.getUniformLocation(gl.program, 'u_LampSet2[1].ambi');
+  this.lamp1.u_diff = gl.getUniformLocation(gl.program, 'u_LampSet2[1].diff');
+  this.lamp1.u_spec = gl.getUniformLocation(gl.program, 'u_LampSet2[1].spec');
+  if( !this.lamp1.u_pos || !this.lamp1.u_ambi || !this.lamp1.u_diff || !this.lamp1.u_spec ) {
+    console.log('Failed to get GPUs Lamp1 storage locations');
    return;
   }
 
@@ -1180,6 +1216,12 @@ VBObox2.prototype.init = function() {
   this.lamp0.I_ambi.elements.set([1.0, 1.0, 1.0]);
   this.lamp0.I_diff.elements.set([1.0, 1.0, 1.0]);
   this.lamp0.I_spec.elements.set([1.0, 1.0, 1.0]);
+
+  // Init World-coord. position & colors of first light source in global vars;
+  this.lamp1.I_pos.elements.set([1.0, 1.0, 1.0]);
+  this.lamp1.I_ambi.elements.set([1.0, 1.0, 1.0]);
+  this.lamp1.I_diff.elements.set([1.0, 1.0, 1.0]);
+  this.lamp1.I_spec.elements.set([1.0, 1.0, 1.0]);
 }
 
 VBObox2.prototype.switchToMe = function() {
@@ -1239,6 +1281,16 @@ gl.useProgram(this.shaderLoc);
   gl.enableVertexAttribArray(this.a_PositionLoc);
   gl.enableVertexAttribArray(this.a_ColorLoc);
   gl.enableVertexAttribArray(this.a_NormalLoc);
+
+  this.lamp0.I_pos.elements.set([tracker.freelight_pos_x, tracker.freelight_pos_y, tracker.freelight_pos_z]);
+  this.lamp1.I_pos.elements.set([g_perspective_eye[0], g_perspective_eye[1], g_perspective_eye[2]]);
+  this.lamp0.I_ambi.elements.set([tracker.freelight_palette.ambient[0]/255.0, tracker.freelight_palette.ambient[1]/255.0, tracker.freelight_palette.ambient[2]/255.0]);
+  this.lamp0.I_diff.elements.set([tracker.freelight_palette.diffuse[0]/255.0, tracker.freelight_palette.diffuse[1]/255.0, tracker.freelight_palette.diffuse[2]/255.0]);
+  this.lamp0.I_spec.elements.set([tracker.freelight_palette.specular[0]/255.0, tracker.freelight_palette.specular[1]/255.0, tracker.freelight_palette.specular[2]/255.0]);
+
+  this.lightsOn[0] = Number(tracker.freelight);
+  this.lightsOn[1] = Number(tracker.headlight);
+
 }
 
 VBObox2.prototype.isReady = function() {
@@ -1279,12 +1331,22 @@ VBObox2.prototype.adjust = function() {
 	  gl.uniform3fv(this.lamp0.u_diff, this.lamp0.I_diff.elements);   // diffuse
 	  gl.uniform3fv(this.lamp0.u_spec, this.lamp0.I_spec.elements);   // Specular
 
+      //---------------For the light source(s):
+    gl.uniform3fv(this.lamp1.u_pos,  this.lamp1.I_pos.elements.slice(0,3));
+    gl.uniform3fv(this.lamp1.u_ambi, this.lamp1.I_ambi.elements);   // ambient
+    gl.uniform3fv(this.lamp1.u_diff, this.lamp1.I_diff.elements);   // diffuse
+    gl.uniform3fv(this.lamp1.u_spec, this.lamp1.I_spec.elements);   // Specular
+
 	  //---------------For the Material object(s):
 	  gl.uniform3fv(this.matl0.uLoc_Ke, this.matl0.K_emit.slice(0,3));        // Ke emissive
 	  gl.uniform3fv(this.matl0.uLoc_Ka, this.matl0.K_ambi.slice(0,3));        // Ka ambient
 	  gl.uniform3fv(this.matl0.uLoc_Kd, this.matl0.K_diff.slice(0,3));        // Kd diffuse
 	  gl.uniform3fv(this.matl0.uLoc_Ks, this.matl0.K_spec.slice(0,3));        // Ks specular
 	  gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny
+
+    gl.uniform1iv(this.u_LightsOn, this.lightsOn);
+    //gl.uniform1i(this.u_LightsOn, this.lightsOn[1]);
+    console.log(this.lightsOn);
 	  //  == specular exponent; (parseInt() converts from float to base-10 integer).
 	}
 
