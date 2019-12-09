@@ -5,6 +5,7 @@ var GuiTracker = function() {
   this.gouraud = true;
   this.phong = false;
   // Lighting
+  this.phong_light = true
   this.blinnphong = false;
   this.material = 11;
   // Lamps
@@ -105,8 +106,16 @@ function initGui() {
     tracker.phong = true;
   });
   shading.open();
-  // var lighting = gui.addFolder('Lighting');
-  gui.add(tracker, 'blinnphong').name('Blinn-Phong Lighting');
+  var lighting = gui.addFolder('Lighting');
+  lighting.add(tracker, 'phong_light').name('Phong Lighting').listen().onChange(function() {
+    tracker.phong_light = true;
+    tracker.blinnphong = false;
+  });
+  lighting.add(tracker, 'blinnphong').name('Blinn-Phong Lighting').listen().onChange(function() {
+    tracker.phong_light = false;
+    tracker.blinnphong = true;
+  });
+  lighting.open();
   gui.add(tracker, 'material',
           {
             MATL_RED_PLASTIC: 1,
@@ -132,7 +141,6 @@ function initGui() {
             MATL_RUBY: 21,
             MATL_TURQUOISE: 22
           }).name('Sphere Material');
-  // lighting.open();
   var lamps = gui.addFolder('Lamps');
   lamps.add(tracker, 'headlight').name('Head Lamp Toggle');
   lamps.add(tracker, 'freelight').name('Free Lamp Toggle');

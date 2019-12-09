@@ -988,30 +988,18 @@ function VBObox2() {
       }
 
 	    gl_FragColor += vec4(
-	      v_Color2 * u_LampSet2[i].ambi * 0.15 +
-	      v_Color2 * u_LampSet2[i].diff * lambertian +
-	      v_Color2 * u_LampSet2[i].spec * specular,
+	      u_MatlSet2[0].ambi * u_LampSet2[i].ambi * 0.15 +
+	      u_MatlSet2[0].diff * u_LampSet2[i].diff * lambertian +
+	      u_MatlSet2[0].spec * u_LampSet2[i].spec * specular,
 	      1.0
 	    ) * float(lightsOn[i]);
+			if (u_useBlinnPhong == 0) {
+				gl_FragColor = vec4(1, 1, 1, 1);
+			}
 
     }
 
-		// gl_FragColor = vec4(
-		// 	v_Color2 * u_LampSet2[0].ambi +
-		// 	v_Color2 * u_LampSet2[0].diff * lambertian +
-		// 	v_Color2 * u_LampSet2[0].spec * specular,
-		// 	1.0
-		// );
-		gl_FragColor = vec4(
-			u_MatlSet2[0].ambi * u_LampSet2[0].ambi +
-			u_MatlSet2[0].diff * u_LampSet2[0].diff * lambertian +
-			u_MatlSet2[0].spec * u_LampSet2[0].spec * specular,
-			1.0
-		);
-
 		u_eyePosWorld;
-		u_MatlSet2[0];
-    u_LampSet2[1];
   }`;
 
   //-------Vertices---------
@@ -1354,9 +1342,6 @@ VBObox2.prototype.adjust = function() {
 	  gl.uniform1i(this.matl0.uLoc_Kshiny, parseInt(this.matl0.K_shiny, 10));     // Kshiny
 
     gl.uniform1iv(this.u_LightsOn, this.lightsOn);
-    //gl.uniform1i(this.u_LightsOn, this.lightsOn[1]);
-    console.log(this.lightsOn);
-	  //  == specular exponent; (parseInt() converts from float to base-10 integer).
 	}
 
 	//----------------For the Matrices: find the model matrix:

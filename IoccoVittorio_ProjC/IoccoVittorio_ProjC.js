@@ -666,7 +666,7 @@ function drawSphere() {
 
   pushMatrix(ModelMatrix);
 
-  ModelMatrix.translate(0, 0, 4);
+  ModelMatrix.translate(0, 0, 7);
   ModelMatrix.rotate(g_angle, 0, 0, 1);
   ModelMatrix.scale(2, 2, 2);
   updateModelMatrix(ModelMatrix);
