@@ -8,7 +8,7 @@ html, body {
 }
 
 html, body, canvas {
-  cursor: url(mosquito.png), auto;
+  cursor: url(lib/mosquito.png), auto;
 }
 
 code {

@@ -78,12 +78,10 @@ var GuiTracker = function() {
   };
   // Reset
   this.reset = function() {
-    this.global_x_pos = this.global_y_pos = this.global_z_pos = 0;
-    this.global_x_rot = this.global_y_rot = this.global_z_rot = 0;
-    this.global_x_scale = this.global_y_scale = this.global_z_scale = 1;
-    g_xMdragTot = 0.0;
-    g_yMdragTot = 0.0;
-    draw();
+    g_perspective_eye = [0, 0, 0]; // where the camera is
+    g_perspective_lookat = [1, 0, 0]; 
+    dragonfly_count = 1;
+    cattail_count = 25;
   };
 }
 var tracker = new GuiTracker();
