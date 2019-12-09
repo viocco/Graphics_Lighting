@@ -78,7 +78,7 @@ var GuiTracker = function() {
   };
   // Reset
   this.reset = function() {
-    g_perspective_eye = [0, 0, 0]; // where the camera is
+    g_perspective_eye = [15, 0, 0]; // where the camera is
     g_perspective_lookat = [1, 0, 0]; 
     dragonfly_count = 1;
     cattail_count = 25;
