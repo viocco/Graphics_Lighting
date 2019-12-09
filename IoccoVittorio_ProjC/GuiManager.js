@@ -4,9 +4,10 @@ var GuiTracker = function() {
   // Shading
   this.gouraud = true;
   this.phong = false;
+  this.extracredit = false;
   // Lighting
-  this.phong_light = true
-  this.blinnphong = false;
+  this.blinnphong = true;
+  this.phong_light = false
   this.material = 11;
   // Lamps
   this.headlight = true;
@@ -100,47 +101,53 @@ function initGui() {
   shading.add(tracker, 'gouraud').name('Gouraud Shading').listen().onChange(function() {
     tracker.gouraud = true;
     tracker.phong = false;
+    tracker.extracredit = false;
   });
   shading.add(tracker, 'phong').name('Phong Shading').listen().onChange(function() {
     tracker.gouraud = false;
     tracker.phong = true;
+    tracker.extracredit = false;
+  });
+  shading.add(tracker, 'extracredit').name('Extra Credit Shader').listen().onChange(function() {
+    tracker.gouraud = false;
+    tracker.phong = false;
+    tracker.extracredit = true;
   });
   shading.open();
   var lighting = gui.addFolder('Lighting');
-  lighting.add(tracker, 'phong_light').name('Phong Lighting').listen().onChange(function() {
-    tracker.phong_light = true;
-    tracker.blinnphong = false;
-  });
   lighting.add(tracker, 'blinnphong').name('Blinn-Phong Lighting').listen().onChange(function() {
     tracker.phong_light = false;
     tracker.blinnphong = true;
   });
+  lighting.add(tracker, 'phong_light').name('Phong Lighting').listen().onChange(function() {
+    tracker.phong_light = true;
+    tracker.blinnphong = false;
+  });
   lighting.open();
-  gui.add(tracker, 'material',
-          {
-            MATL_RED_PLASTIC: 1,
-            MATL_GRN_PLASTIC: 2,
-            MATL_BLU_PLASTIC: 3,
-            MATL_BLACK_PLASTIC: 4,
-            MATL_BLACK_RUBBER: 5,
-            MATL_BRASS: 6,
-            MATL_BRONZE_DULL: 7,
-            MATL_BRONZE_SHINY: 8,
-            MATL_CHROME: 9,
-            MATL_COPPER_DULL: 10,
-            MATL_COPPER_SHINY: 11,
-            MATL_GOLD_DULL: 12,
-            MATL_GOLD_SHINY: 13,
-            MATL_PEWTER: 14,
-            MATL_SILVER_DULL: 15,
-            MATL_SILVER_SHINY: 16,
-            MATL_EMERALD: 17,
-            MATL_JADE: 18,
-            MATL_OBSIDIAN: 19,
-            MATL_PEARL: 20,
-            MATL_RUBY: 21,
-            MATL_TURQUOISE: 22
-          }).name('Sphere Material');
+  gui.add(tracker, 'material', {
+    MATL_RED_PLASTIC: 1,
+    MATL_GRN_PLASTIC: 2,
+    MATL_BLU_PLASTIC: 3,
+    MATL_BLACK_PLASTIC: 4,
+    MATL_BLACK_RUBBER: 5,
+    MATL_BRASS: 6,
+    MATL_BRONZE_DULL: 7,
+    MATL_BRONZE_SHINY: 8,
+    MATL_CHROME: 9,
+    MATL_COPPER_DULL: 10,
+    MATL_COPPER_SHINY: 11,
+    MATL_GOLD_DULL: 12,
+    MATL_GOLD_SHINY: 13,
+    MATL_PEWTER: 14,
+    MATL_SILVER_DULL: 15,
+    MATL_SILVER_SHINY: 16,
+    MATL_EMERALD: 17,
+    MATL_JADE: 18,
+    MATL_OBSIDIAN: 19,
+    MATL_PEARL: 20,
+    MATL_RUBY: 21,
+    MATL_TURQUOISE: 22
+  }).name('Sphere Material');
   var lamps = gui.addFolder('Lamps');
   lamps.add(tracker, 'headlight').name('Head Lamp Toggle');
   lamps.add(tracker, 'freelight').name('Free Lamp Toggle');
@@ -150,7 +157,7 @@ function initGui() {
   lamps.addColor(tracker.freelight_palette, 'ambient');
   lamps.addColor(tracker.freelight_palette, 'diffuse');
   lamps.addColor(tracker.freelight_palette, 'specular');
-  // lamps.open();
+  lamps.open();
   var anim = gui.addFolder('Animations');
   anim.add(tracker, 'animate_toggle').name('Toggle Animation').listen().onChange(function(value) {
     if (value) {

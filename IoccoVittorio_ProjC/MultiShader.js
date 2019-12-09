@@ -26,6 +26,7 @@ CreateVBO();
 worldBox = new VBObox0(); // Holds VBO & shaders for 3D 'world' ground-plane grid, etc;
 part1Box = new VBObox1(); // "  "  for first set of custom-shaded 3D parts
 part2Box = new VBObox2(); // "  "  for second set of custom-shaded 3D parts
+part3Box = new VBObox3(); // "  "  for third set of custom-shaded 3D parts
 
 // For animation:---------------------
 var g_lastMS = Date.now(); // Timestamp (in milliseconds) for our
@@ -109,6 +110,7 @@ function main() {
   worldBox.init(gl);
   part1Box.init(gl);
   part2Box.init(gl);
+  part3Box.init(gl);
 
   gl.clearColor(0.5, 0.7, 1, 1.0);
   gl.enable(gl.DEPTH_TEST);
@@ -185,6 +187,11 @@ function drawAll() {
     part2Box.adjust();
     part2Box.draw();
   }
+  if (tracker.extracredit) {
+    part3Box.switchToMe();
+    part3Box.adjust();
+    part3Box.draw();
+  }
 }
 
 function drawResize() {
@@ -204,8 +211,6 @@ function myKeyDown(kev) {
   switch (code) {
     case "KeyW":
     case "87":
-    case "ArrowUp":
-      // tracker.global_y_pos -= 0.01;
       var D = [
         (g_perspective_lookat[0] - g_perspective_eye[0]) * 0.5,
         (g_perspective_lookat[1] - g_perspective_eye[1]) * 0.5,
@@ -220,8 +225,6 @@ function myKeyDown(kev) {
       break;
     case "KeyA":
     case "65":
-    case "ArrowLeft":
-      // tracker.global_x_pos += 0.01;
       var D = [
         g_perspective_lookat[0] - g_perspective_eye[0],
         g_perspective_lookat[1] - g_perspective_eye[1],
@@ -240,8 +243,6 @@ function myKeyDown(kev) {
       break;
     case "KeyS":
     case "83":
-    case "ArrowDown":
-      // tracker.global_y_pos += 0.01;
       var D = [
         (g_perspective_lookat[0] - g_perspective_eye[0]) * 0.5,
         (g_perspective_lookat[1] - g_perspective_eye[1]) * 0.5,
@@ -256,8 +257,6 @@ function myKeyDown(kev) {
       break;
     case "KeyD":
     case "68":
-    case "ArrowRight":
-      // tracker.global_x_pos -= 0.01;
       var D = [
         g_perspective_lookat[0] - g_perspective_eye[0],
         g_perspective_lookat[1] - g_perspective_eye[1],
@@ -294,18 +293,19 @@ function myKeyDown(kev) {
       g_perspective_lookat[0] = g_perspective_eye[0] + Math.cos(theta);
       g_perspective_lookat[1] = g_perspective_eye[1] + Math.sin(theta);
       break;
-		case "KeyP":
+    case "KeyP":
     case "80":
-			if (tracker.animate_toggle) {
-			  tracker.animate_toggle = false;
-		  }
-			else {
-			  tracker.animate_toggle = true;
+      if (tracker.animate_toggle) {
+        tracker.animate_toggle = false;
+      } else {
+        tracker.animate_toggle = true;
         g_last = Date.now();
-        for (var i = 0; i < g_cattails.length; i++) {g_cattails[i][4] = Date.now();}
-			  tick();
-		  }
-			break;
+        for (var i = 0; i < g_cattails.length; i++) {
+          g_cattails[i][4] = Date.now();
+        }
+        tick();
+      }
+      break;
     case "Slash":
     case "191":
       toggle_help();
