@@ -853,7 +853,7 @@ VBObox1.prototype.adjust = function() {
 
 	gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
-	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
+	gl.uniform1i(this.u_useBlinnPhongLoc, tracker.blinnphong ? 1 : 0);
 
   gl.uniform3fv(this.u_lightPos, this.lightPos.elements);
   gl.uniform3fv(this.u_headLightPos, this.headLightPos.elements);
@@ -993,9 +993,6 @@ function VBObox2() {
 	      u_MatlSet2[0].spec * u_LampSet2[i].spec * specular,
 	      1.0
 	    ) * float(lightsOn[i]);
-			if (u_useBlinnPhong == 0) {
-				gl_FragColor = vec4(1, 1, 1, 1);
-			}
 
     }
 
@@ -1358,7 +1355,7 @@ VBObox2.prototype.adjust = function() {
 
   gl.uniformMatrix4fv(this.u_ProjectionMatrixLoc, false, this.ProjectionMatrix.elements);
 
-	gl.uniform1i(this.u_useBlinnPhong, tracker.blinnphong ? 1 : 0);
+	gl.uniform1i(this.u_useBlinnPhongLoc, tracker.blinnphong ? 1 : 0);
 
 	this.reload();
 }
