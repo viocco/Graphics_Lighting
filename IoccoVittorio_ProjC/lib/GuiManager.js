@@ -78,10 +78,9 @@ var GuiTracker = function() {
   };
   // Reset
   this.reset = function() {
-    g_perspective_eye = [15, 0, 0]; // where the camera is
-    g_perspective_lookat = [1, 0, 0]; 
-    dragonfly_count = 1;
-    cattail_count = 25;
+    //g_perspective_eye = [15, 0, 0]; // where the camera is
+    //dragonfly_count = 1;
+    //cattail_count = 25;
   };
 }
 var tracker = new GuiTracker();
@@ -178,7 +177,7 @@ function initGui() {
   manage_objects.add(tracker, 'addCattail').name('Add Cattail');
   manage_objects.add(tracker, 'removeCattail').name('Remove Cattail');
   // manage_objects.open();
-  gui.add(tracker, 'reset').name('Reset');
+  //gui.add(tracker, 'reset').name('Reset');
   if (!gui_open)
     gui.close();
   document.getElementsByClassName('close-bottom')[0].onclick = function() {
