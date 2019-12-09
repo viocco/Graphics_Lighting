@@ -33,7 +33,7 @@ var logCap;
 var logEnd;
 var rockStart;
 var rockEnd;
-var is_spinning = false;
+var is_spinning = true;
 
 // Camera vars
 var g_perspective_eye = [0, 0, 0]; // where the camera is
@@ -45,7 +45,7 @@ var onDragonfly = false;
 // Animation vars
 var g_last = Date.now();
 var g_angle = 0.0;
-var g_angle_rate = 45.0;
+var g_angle_rate = 15.0;
 // Cattails
 var cattail_count = 25;
 var g_cattails = [];
@@ -643,18 +643,15 @@ function draw() {
 
   drawSphere();
   for (var i = 0; i < lily_count; i++) {
-    updateMaterial(MATL_RED_PLASTIC);
     drawLilyPads(g_lilys[i][0], g_lilys[i][1], g_lilys[i][2], g_lilys[i][3]);
   }
   for (var i = 0; i < rock_count; i++) {
-    updateMaterial(MATL_OBSIDIAN);
     drawRocks(g_rocks[i][0], g_rocks[i][1], g_rocks[i][2], g_rocks[i][3]);
   }
   for (var i = 0; i < log_count; i++) {
     drawLogs(g_logs[i][0], g_logs[i][1], g_logs[i][2], g_logs[i][3]);
   }
   for (var i = 0; i < dragonfly_count; i++) {
-    updateMaterial(MATL_BLU_PLASTIC);
     drawDragonfly(i);
   }
   for (var i = 0; i < cattail_count; i++) {
@@ -669,8 +666,8 @@ function drawSphere() {
 
   pushMatrix(ModelMatrix);
 
-  ModelMatrix.translate(0, 0, -2);
-  ModelMatrix.rotate(45, 0, 0, 1);
+  ModelMatrix.translate(0, 0, 4);
+  ModelMatrix.rotate(g_angle, 0, 0, 1);
   ModelMatrix.scale(2, 2, 2);
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_STRIP, matSphereStart, matSphereLen + 1);
@@ -792,6 +789,7 @@ function drawStalk(c_sway) {
  * @param d the dragonfly to draw.
  */
 function drawDragonfly(d) {
+  updateMaterial(MATL_BLU_PLASTIC);
 
   // Chase random on-screen positions
   var magnitude = Math.sqrt((Math.pow(g_dragonflies[d][4] - g_dragonflies[d][0]), 2) + Math.pow((g_dragonflies[d][5] - g_dragonflies[d][1]), 2) + Math.pow((g_dragonflies[d][8] - g_dragonflies[d][7]), 2));
@@ -1063,14 +1061,18 @@ function drawLogs(x, y, rot, scale) {
 }
 
 function drawRocks(x, y, rot, scale) {
+  updateMaterial(MATL_OBSIDIAN);
+
   // Group: Rocks
   pushMatrix(ModelMatrix);
+
   ModelMatrix.translate(x, y, -1);
   ModelMatrix.rotate(rot, 0, 0, 1);
   ModelMatrix.scale(scale, scale, scale);
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_FAN, rockStart, rockMid - rockStart);
   gl.drawArrays(gl.TRIANGLE_STRIP, rockMid, rockEnd - rockMid);
+
   // End Group: Rocks
   ModelMatrix = popMatrix();
 }
@@ -1088,17 +1090,22 @@ function drawGroundGrid() {
 function drawLilyPads(x, y, rot, scale) {
   // GROUP: Lily Pad
   pushMatrix(ModelMatrix)
+
+  // Object: Pad
+  updateMaterial(MATL_GRN_PLASTIC);
   ModelMatrix.translate(x, y, -.99);
   ModelMatrix.rotate(rot, 0, 0, 1);
   ModelMatrix.scale(scale, scale, scale);
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_FAN, lilyStart, lilyLen);
 
+  // Group: Petals
+  updateMaterial(MATL_RUBY);
   pushMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(75, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
   gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen, 3);
@@ -1182,15 +1189,6 @@ function drawLilyPads(x, y, rot, scale) {
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
   gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
-
-  // OBJECT: Center bulb
-  pushMatrix(ModelMatrix)
-  ModelMatrix.scale(.07, .07, .07);
-  ModelMatrix.translate(0, 0, 1);
-  updateModelMatrix(ModelMatrix);
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 6, sphereLen3);
-  ModelMatrix = popMatrix();
-
   ModelMatrix = popMatrix();
 
   pushMatrix(ModelMatrix);
@@ -1198,8 +1196,6 @@ function drawLilyPads(x, y, rot, scale) {
   ModelMatrix.rotate(75, 0, 0, 1);
   updateModelMatrix(ModelMatrix);
   gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
-  updateModelMatrix(ModelMatrix)
-  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
   gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
@@ -1209,6 +1205,19 @@ function drawLilyPads(x, y, rot, scale) {
   ModelMatrix.rotate(70, 0, 0, 1);
   updateModelMatrix(ModelMatrix)
   gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  ModelMatrix.rotate(70, 0, 0, 1);
+  updateModelMatrix(ModelMatrix)
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 3, 3);
+  ModelMatrix = popMatrix();
+  // END GROUP: Petals
+
+  // OBJECT: Center bulb
+  updateMaterial(MATL_BRASS);
+  pushMatrix(ModelMatrix);
+  ModelMatrix.scale(.035, .035, .035);
+  ModelMatrix.translate(0, 0, 1);
+  updateModelMatrix(ModelMatrix);
+  gl.drawArrays(gl.TRIANGLE_STRIP, lilyStart + lilyLen + 6, sphereLen3);
   ModelMatrix = popMatrix();
 
   // END GROUP: Lily Pad
